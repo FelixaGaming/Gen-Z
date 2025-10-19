@@ -1,0 +1,3335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <title>Words have Power</title>
+  <!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-RR6PRVFRVK"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-RR6PRVFRVK');
+</script>
+  <style>
+    :root {
+      --bg: #ffffff;
+      --panel: #ffffff;
+      --muted: #555555;
+      --text: #1a1a1a;
+      --accent: #FFD700; /* Gold */
+      --good: #22c55e;
+      --bad: #ef4444;
+      --bubble: #ffffff;
+      --shadow: 0 4px 12px rgba(0,0,0,.1);
+      --table: rgba(0,0,0,.04);
+    }
+    * { box-sizing: border-box; }
+    
+    html {
+      background: #ffffff !important;
+      margin: 0 !important;
+      padding: 0 !important;
+    }
+    
+    /* Touch-friendly interactions */
+    button, .choice-btn, .cta, .reset { 
+      -webkit-tap-highlight-color: rgba(255,215,0,.2);
+      touch-action: manipulation;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+    
+    body {
+      margin: 0; padding: 12px; background: #ffffff !important;
+      color: var(--text); font: 16px/1.45 -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', sans-serif;
+      min-height: 100vh; display: flex; align-items: center; justify-content: center;
+    }
+    .app { width: min(1080px, 100%); max-width: 100%; background: transparent !important; }
+    header { display: none !important; }
+    .title { display: grid; gap: 4px; }
+    h1 { font-size: 20px; margin: 0; line-height: 1.2; }
+    .subtitle { color: #555; font-size: 13px; line-height: 1.4; }
+    .card { background: transparent !important; border: none !important; box-shadow: none !important; }
+    .post { background: transparent !important; border: none !important; box-shadow: none !important; padding: 0 !important; margin: 0 !important; }
+    .post-header { display: none !important; }
+    .video-title { display: none !important; }
+    .post-stats { display: none !important; }
+    .chips { display: none !important; }
+    
+    /* Modal styles */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      animation: fadeIn 0.3s ease;
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    
+    .modal.show {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .modal-content {
+      background-color: #ffffff;
+      padding: 32px;
+      border-radius: 16px;
+      max-width: 500px;
+      width: 90%;
+      max-height: 80vh;
+      overflow-y: auto;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+      animation: slideIn 0.3s ease;
+    }
+    
+    @keyframes slideIn {
+      from {
+        transform: translateY(-50px);
+        opacity: 0;
+      }
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+    
+    .modal-header {
+      font-size: 20px;
+      font-weight: 800;
+      margin-bottom: 20px;
+      color: #1a1a1a;
+    }
+    
+    .modal-body {
+      font-size: 15px;
+      line-height: 1.6;
+      color: #333;
+      margin-bottom: 20px;
+    }
+    
+    .modal-body p {
+      margin: 12px 0;
+    }
+    
+    .modal-footer {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin-top: 24px;
+    }
+    
+    .modal-close {
+      background: #FFD700;
+      color: #333;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      font-size: 14px;
+      transition: all 0.2s ease;
+    }
+    
+    .modal-close:hover {
+      background: #FFC700;
+      transform: scale(1.05);
+    }
+    .post-avatar { width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg, #FFD700, #FFC700); display: grid; place-items: center; font-size: 20px; border: 2px solid rgba(255,215,0,0.3); }
+    .post-meta { display: flex; flex-direction: column; gap: 3px; }
+    .post-channel { font-weight: 600; font-size: 15px; }
+    .post-time { font-size: 12px; color: #666; }
+    .video-thumbnail { 
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      background: transparent !important;
+      border: none !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      min-height: 100px;
+      position: relative;
+    }
+    .video-thumbnail:hover { transform: scale(1.02); }
+    .video-playing {
+      cursor: pointer;
+    }
+    .video-playing:hover {
+      border-color: rgba(139,92,246,0.3);
+    }
+    .video-thumbnail::before {
+      display: none !important;
+    }
+    .video-playing::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image: 
+        repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(255,255,255,.03) 2px, rgba(255,255,255,.03) 4px);
+      opacity: 0.1;
+      animation: filmGrain 0.2s steps(2) infinite;
+      pointer-events: none;
+      z-index: 4;
+    }
+    @keyframes filmGrain {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(2px); }
+    }
+    .video-content {
+      display: none !important;
+    }
+    .video-scene {
+      display: none !important;
+    }
+    .video-caption {
+      display: none !important;
+    }
+    .video-duration {
+      display: none !important;
+    }
+    .play-button {
+      display: none !important;
+    }
+    .play-button {
+      width: 68px;
+      height: 68px;
+      background: rgba(255, 255, 255, 0.95);
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      font-size: 28px;
+      color: #000;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+      transition: all 0.2s ease;
+    }
+    .video-thumbnail:hover .play-button {
+      background: rgba(139,92,246,0.95);
+      color: white;
+      transform: scale(1.1);
+    }
+    .video-playing {
+      background: linear-gradient(135deg, #0f0f12, #1a1a1a) !important;
+    }
+    .video-playing::before { opacity: 0.3 !important; }
+    .video-caption {
+      position: absolute;
+      bottom: 20px;
+      left: 20px;
+      right: 20px;
+      background: rgba(0, 0, 0, 0.9);
+      padding: 16px 18px;
+      border-radius: 10px;
+      font-size: 15px;
+      line-height: 1.5;
+      text-align: left;
+      opacity: 0;
+      transform: translateY(10px);
+      transition: all 0.3s ease;
+      z-index: 10;
+      backdrop-filter: blur(8px);
+      border-left: 4px solid #ef4444;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+    }
+    .video-caption.active {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .video-caption.caption-concern {
+      background: rgba(239, 68, 68, 0.25);
+      border-left: 4px solid #ef4444;
+      backdrop-filter: blur(12px);
+    }
+    .video-caption.caption-counter {
+      background: rgba(34, 197, 94, 0.25);
+      border-left: 4px solid #22c55e;
+      backdrop-filter: blur(12px);
+    }
+    .video-playing .video-content { opacity: 0; pointer-events: none; }
+    .video-scene {
+      position: absolute;
+      inset: 0;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 2;
+    }
+    .video-playing .video-scene { display: flex; }
+    
+    /* Full-screen video scene */
+    .scene-discussion {
+      position: relative;
+      width: 100%;
+      height: 100%;
+    }
+    
+    .pause-button {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 68px;
+      height: 68px;
+      background: rgba(255, 255, 255, 0.95);
+      border-radius: 50%;
+      display: none !important;
+      place-items: center;
+      font-size: 28px;
+      color: #000;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+      cursor: pointer;
+      z-index: 5;
+      transition: all 0.2s ease;
+    }
+    .pause-button:hover {
+      background: rgba(139,92,246,0.95);
+      color: white;
+      transform: translate(-50%, -50%) scale(1.1);
+    }
+    .video-playing .pause-button { display: none !important; }
+    .video-duration {
+      position: absolute;
+      bottom: 10px;
+      right: 10px;
+      background: rgba(0,0,0,0.85);
+      padding: 3px 8px;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 700;
+      z-index: 11;
+      backdrop-filter: blur(4px);
+    }
+    .video-badge {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      background: rgba(255,0,0,0.95);
+      padding: 5px 10px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      z-index: 11;
+      box-shadow: 0 2px 8px rgba(255,0,0,0.4);
+    }
+    .video-player { width: 100%; border-radius: 12px; overflow: hidden; margin-bottom: 8px; background: #000; aspect-ratio: 16/9; }
+    .video-player video { width: 100%; height: 100%; display: block; }
+    .video-title { font-weight: 600; font-size: 15px; line-height: 1.4; margin-bottom: 8px; }
+    .post-stats { display: flex; gap: 16px; font-size: 13px; color: var(--muted); margin-bottom: 8px; }
+    .stat-item { display: flex; align-items: center; gap: 4px; }
+    .chips { display: flex; gap: 8px; flex-wrap: wrap; }
+    .chip { font-size: 12px; color: #3ea6ff; background: transparent; padding: 0; border: none; font-weight: 500; cursor: pointer; }
+    .chip:hover { text-decoration: underline; }
+
+    .stage { 
+      display: flex; 
+      flex-direction: column; 
+      gap: 12px; 
+      max-height: 60vh; 
+      overflow-y: auto; 
+      overflow-x: hidden;
+      padding-right: 2px;
+      scroll-behavior: smooth;
+      background: transparent !important;
+      /* Hide scrollbar for cleaner look */
+      scrollbar-width: none; /* Firefox */
+      -ms-overflow-style: none; /* IE and Edge */
+    }
+    .stage::-webkit-scrollbar {
+      display: none; /* Chrome, Safari, Opera */
+    }
+    .stage.entering {
+      animation: stageEnter 0.6s ease forwards;
+    }
+    @keyframes stageEnter {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .thread { display: grid; gap: 10px; margin-bottom: 16px; }
+    .msg { display: grid; grid-template-columns: 36px 1fr; gap: 10px; margin-bottom: 12px; }
+    .avatar { width: 36px; height: 36px; border-radius: 50%; display: grid; place-items: center; font-weight: 700; color: white; background: linear-gradient(135deg, #FFD700, #FFC700); border: 2px solid rgba(255,215,0,.4); font-size: 16px; }
+    .avatar--sarah { background: linear-gradient(135deg, #FFD700, #FFC700); border: 2px solid #FFD700; }
+    .avatar--sarah::before { content: '👩'; }
+    .avatar--rex   { background: linear-gradient(135deg, #ef4444, #dc2626); border: 2px solid #ef4444; }
+    .avatar--rex::before { content: '🎮'; }
+    .avatar--clod24 { background: linear-gradient(135deg, #4B5563, #2D3436); border: 3px solid #FF6B6B; }
+    .avatar--clod24::before { content: '⚠️'; }
+    .avatar--rob   { background: linear-gradient(135deg, #3B82F6, #2563EB); border: 2px solid #3B82F6; }
+    .avatar--rob::before { content: '🧑'; }
+    .avatar--clau24 { background: linear-gradient(135deg, #6366F1, #4F46E5); border: 2px solid #6366F1; }
+    .avatar--clau24::before { content: '💭'; }
+    .avatar--leo   { background: linear-gradient(135deg, #8B5CF6, #7C3AED); border: 2px solid #8B5CF6; }
+    .avatar--leo::before { content: '🎯'; }
+    .avatar--mia   { background: linear-gradient(135deg, #EC4899, #DB2777); border: 2px solid #EC4899; }
+    .avatar--mia::before { content: '💀'; }
+    .avatar--tommy { background: linear-gradient(135deg, #F59E0B, #D97706); border: 2px solid #F59E0B; }
+    .avatar--tommy::before { content: '🔥'; }
+    .avatar--luna  { background: linear-gradient(135deg, #06B6D4, #0891B2); border: 2px solid #06B6D4; }
+    .avatar--luna::before { content: '💥'; }
+    .avatar--trollzor { background: linear-gradient(135deg, #10B981, #059669); border: 2px solid #10B981; }
+    .avatar--trollzor::before { content: '😈'; }
+    .avatar--you   { background: linear-gradient(135deg, #22c55e, #16a34a); border: 2px solid #22c55e; }
+    .avatar--you::before { content: '⭐'; }
+    .bubble { background: var(--bubble); border: 1px solid rgba(0,0,0,.08); padding: 12px 14px; border-radius: 12px; font-size: 15px; line-height: 1.6; word-wrap: break-word; color: #1a1a1a; }
+    .name { font-weight: 700; margin-bottom: 2px; font-size: 13px; }
+    .meta { color: var(--muted); font-size: 12px; }
+
+    .choices { display: grid; grid-template-columns: 1fr; gap: 10px; margin-top: 14px; }
+    .choice-btn { width: 100%; text-align: left; border: 2px solid #FFD700; background: #ffffff; color: var(--text); border-radius: 12px; padding: 14px 16px; cursor: pointer; font-size: 15px; line-height: 1.5; min-height: 50px; display: flex; align-items: center; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', sans-serif; }
+    .choice-btn:hover { border-color: #FFA500; background: #fffef5; }
+    .choice-btn:active { /* No animation */ }
+    .choice-btn.highlight:hover {
+      /* No animation */
+    }
+    .choice-btn:disabled { cursor: not-allowed; }
+    .choice-btn.highlight {
+      border-color: rgba(255,215,0,.8);
+      background: #ffffff;
+    }
+    .choice-prompt {
+      text-align: center;
+      color: var(--accent);
+      font-size: 14px;
+      font-weight: 600;
+      margin-top: 12px;
+      opacity: 0;
+      animation: fadeInPrompt 0.5s ease forwards;
+      display: none;
+      position: relative;
+    }
+    .choice-prompt.show { 
+      display: block; 
+    }
+    .choice-prompt::before {
+      content: 'ðŸ‘†';
+      display: inline-block;
+      animation: pointUp 1s ease-in-out infinite;
+      margin-right: 8px;
+    }
+    @keyframes pointUp {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-5px); }
+    }
+    @keyframes fadeInPrompt {
+      from { opacity: 0; transform: translateY(-5px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .video-transition {
+      animation: fadeOut 0.5s ease forwards;
+    }
+    @keyframes fadeOut {
+      to { opacity: 0; }
+    }
+
+    .feedback { 
+      display: flex; 
+      align-items: center; 
+      gap: 12px; 
+      background: #f5f5f5;
+      border: none;
+      border-left: 3px solid #22c55e; 
+      padding: 12px 14px; 
+      border-radius: 6px; 
+      font-size: 13px; 
+      line-height: 1.5;
+      color: #333;
+      font-style: italic;
+      margin-top: 12px;
+      margin-left: 38px;
+      width: calc(100% - 38px);
+      transition: opacity 0.4s ease;
+    }
+    .feedback.negative {
+      background: #fafafa;
+      border-left: 3px solid #ef4444;
+    }
+    .feedback .tag { font-weight: 700; color: var(--accent); margin-right: 4px; font-size: 12px; }
+    .feedback img { flex-shrink: 0; }
+
+    .controls { display: flex; gap: 10px; justify-content: space-between; align-items: center; margin-top: 8px; }
+    .pill { padding: 8px 12px; border-radius: 999px; border: 1px solid rgba(0,0,0,.12); color: var(--muted); font-size: 12px; }
+    .cta { background: var(--accent); color: #333333; border: none; border-radius: 999px; padding: 12px 18px; font-weight: 700; cursor: pointer; font-size: 15px; min-height: 48px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', sans-serif; }
+    .cta:hover { /* No animation */ }
+    .cta:active { /* No animation */ }
+    
+    .reset { background: transparent; border: 2px solid #888888; color: var(--text); padding: 12px 18px; border-radius: 999px; cursor: pointer; font-size: 15px; min-height: 48px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', sans-serif; }
+    .reset:active { /* No animation */ }
+
+    .divider { height: 1px; background: rgba(0,0,0,.08); margin: 8px 0; }
+
+    /* Progress */
+    .progress-wrap { display: none !important; }
+    .progress-bar { display: none !important; }
+
+    .fade-in { 
+      animation: slideUp 0.4s ease;
+    }
+    @keyframes slideUp {
+      from { 
+        opacity: 0; 
+        transform: translateY(10px);
+      } 
+      to { 
+        opacity: 1; 
+        transform: translateY(0);
+      } 
+    }
+    
+    /* Orb Card Styles */
+    .orb-card {
+      position: relative;
+    }
+    .orb-card::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 80px;
+      height: 80px;
+      background: radial-gradient(circle, rgba(255,255,255,0.8), transparent);
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+      opacity: 0.3;
+      pointer-events: none;
+    }
+    .orb-card:hover::before {
+      animation: orbGlow 1.5s ease-in-out infinite;
+    }
+    @keyframes orbGlow {
+      0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.3; }
+      50% { transform: translate(-50%, -50%) scale(1.2); opacity: 0.5; }
+    }
+    @keyframes orbPulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.1); }
+    }
+
+    /* Typing Indicator */
+    .typing-indicator {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 12px 14px;
+      margin-bottom: 8px;
+    }
+    .typing-indicator .dot {
+      width: 8px;
+      height: 8px;
+      background: #888;
+      border-radius: 50%;
+      animation: typingDot 1.4s infinite;
+    }
+    .typing-indicator .dot:nth-child(2) {
+      animation-delay: 0.2s;
+    }
+    .typing-indicator .dot:nth-child(3) {
+      animation-delay: 0.4s;
+    }
+    @keyframes typingDot {
+      0%, 60%, 100% {
+        opacity: 0.3;
+        transform: scale(0.8);
+      }
+      30% {
+        opacity: 1;
+        transform: scale(1.1);
+      }
+    }
+
+    /* End/Results */
+    .center { text-align: center; }
+    .end-title { font-size: 20px; font-weight: 800; margin-bottom: 6px; }
+    .end-sub { color: var(--muted); margin-bottom: 16px; font-size: 14px; }
+
+    /* Animated Score Display */
+    .score-reveal {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 60vh;
+      gap: 32px;
+    }
+    .score-number {
+      font-size: 120px;
+      font-weight: 800;
+      color: var(--accent);
+      line-height: 1;
+      opacity: 0;
+      transform: scale(0.5);
+      animation: scoreAppear 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    }
+    @keyframes scoreAppear {
+      to {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+    .score-label {
+      font-size: 24px;
+      font-weight: 600;
+      color: var(--text);
+      opacity: 0;
+      animation: fadeInUp 0.6s ease 0.4s forwards;
+    }
+    .score-sublabel {
+      font-size: 16px;
+      color: var(--muted);
+      opacity: 0;
+      animation: fadeInUp 0.6s ease 0.6s forwards;
+    }
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    .next-btn {
+      opacity: 0;
+      animation: fadeInUp 0.6s ease 1s forwards;
+    }
+
+    /* Tables */
+    table { width: 100%; border-collapse: collapse; font-size: 14px; }
+    thead th { text-align: left; font-size: 13px; color: #1a1a1a; border-bottom: 1px solid var(--table); padding: 10px; font-weight: 600; }
+    tbody td { border-bottom: 1px solid var(--table); padding: 10px; vertical-align: top; font-size: 14px; line-height: 1.5; word-wrap: break-word; max-width: 400px; color: #1a1a1a; }
+    .tcard { background: linear-gradient(180deg, rgba(255,255,255,.95), rgba(255,255,255,.98)); border: 1px solid rgba(0,0,0,.08); border-radius: 14px; padding: 14px; box-shadow: var(--shadow); }
+    .tcard .name { font-size: 16px; font-weight: 600; margin-bottom: 8px; }
+    .k { color: var(--muted); font-size: 12px; }
+
+    /* Matrix profile styles */
+    .matrix-container { display: grid; gap: 16px; margin-top: 12px; }
+    .profile-matrix { display: grid; grid-template-columns: repeat(auto-fit, minmax(80px, 1fr)); gap: 16px; }
+    .profile-cell { padding: 12px 8px; border-radius: 0; cursor: pointer; transition: opacity .2s ease; border: none; background: transparent; position: relative; text-align: center; }
+    .profile-cell::before { display: none; }
+    .profile-cell:hover { transform: none; box-shadow: none; }
+    .profile-cell:hover::before { opacity: 0; }
+    .cell-name { font-weight: 400; font-size: 13px; margin-bottom: 6px; position: relative; z-index: 1; color: var(--text); }
+    .cell-count { font-size: 16px; font-weight: 600; color: var(--text); position: relative; z-index: 1; margin-bottom: 4px; line-height: 1; }
+    .cell-level { display: none; }
+    .profile-section { }
+    .section-title { font-size: 12px; font-weight: 700; color: var(--accent); margin-bottom: 10px; text-transform: uppercase; letter-spacing: 1px; opacity: 0.8; }
+    .tooltip { position: fixed; background: rgba(31,33,39,.95); border: 1px solid rgba(139,92,246,.7); border-radius: 10px; padding: 14px; font-size: 13px; color: var(--text); z-index: 100; max-width: 200px; box-shadow: 0 12px 32px rgba(139,92,246,.2); backdrop-filter: blur(4px); }
+    .tooltip-label { font-weight: 700; color: var(--accent); margin-bottom: 6px; font-size: 14px; }
+    .tooltip-def { color: var(--muted); font-size: 12px; line-height: 1.5; }
+
+    /* Behavioral Analysis Styles */
+    .analysis-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid rgba(139,92,246,.2);
+    }
+    .growth-meter {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 16px;
+      background: linear-gradient(135deg, rgba(34,197,94,.15), rgba(34,197,94,.08));
+      border-radius: 14px;
+      border: 2px solid rgba(34,197,94,.4);
+      margin-bottom: 16px;
+      position: relative;
+      overflow: hidden;
+    }
+    .growth-meter::before {
+      content: '';
+      position: absolute;
+      font-size: 60px;
+      opacity: 0.1;
+      right: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+    }
+    .growth-score {
+      font-size: 48px;
+      font-weight: 800;
+      color: var(--good);
+      line-height: 1;
+      text-shadow: 0 2px 8px rgba(34,197,94,.3);
+      animation: scoreAppear 0.8s ease;
+    }
+    @keyframes scoreAppear {
+      from { transform: scale(0); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+    .growth-label {
+      flex: 1;
+      font-size: 15px;
+      line-height: 1.4;
+      position: relative;
+      z-index: 1;
+    }
+    .growth-bar-container {
+      width: 100%;
+      height: 10px;
+      background: rgba(255,255,255,.1);
+      border-radius: 10px;
+      overflow: hidden;
+      margin-top: 8px;
+      box-shadow: inset 0 2px 4px rgba(0,0,0,.2);
+    }
+    .growth-bar {
+      height: 100%;
+      background: linear-gradient(90deg, var(--good), var(--accent));
+      border-radius: 10px;
+      transition: width 1.5s cubic-bezier(0.65, 0, 0.35, 1);
+      box-shadow: 0 0 10px rgba(34,197,94,.4);
+    }
+    .strategy-grid {
+      display: grid;
+      gap: 12px;
+      margin-top: 16px;
+    }
+    .strategy-card {
+      background: transparent;
+      border: 2px solid #FFD700;
+      border-radius: 12px;
+      padding: 0;
+      transition: all .3s ease;
+      cursor: pointer;
+      overflow: hidden;
+    }
+    .strategy-card:hover {
+      border-color: #FFC700;
+      transform: none;
+      box-shadow: none;
+    }
+    .strategy-card.expanded {
+      border-color: #FFD700;
+      box-shadow: none;
+    }
+    .strategy-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px;
+      cursor: pointer;
+      user-select: none;
+    }
+    .strategy-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 700;
+      font-size: 16px;
+      color: #1a1a1a;
+    }
+    .strategy-icon {
+      display: none;
+    }
+    .strategy-expand {
+      font-size: 24px;
+      color: var(--accent);
+      transition: transform 0.3s ease;
+    }
+    .strategy-card.expanded .strategy-expand {
+      transform: rotate(180deg);
+    }
+    .strategy-content {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.3s ease;
+      padding: 0 16px;
+    }
+    .strategy-card.expanded .strategy-content {
+      max-height: 500px;
+      padding: 0 16px 16px 16px;
+    }
+    .strategy-description {
+      font-size: 14px;
+      line-height: 1.6;
+      color: var(--text);
+      margin-bottom: 12px;
+    }
+    .strategy-technique {
+      padding: 12px;
+      background: transparent;
+      border-left: 3px solid #FFD700;
+      border-radius: 0;
+      font-size: 13px;
+      line-height: 1.6;
+    }
+    .technique-label {
+      font-weight: 700;
+      color: var(--accent);
+      margin-bottom: 6px;
+      display: block;
+    }
+    .insight-box {
+      background: transparent;
+      border: none;
+      border-radius: 0;
+      padding: 0;
+      margin-bottom: 16px;
+    }
+    .insight-title {
+      font-weight: 700;
+      font-size: 16px;
+      color: #1a1a1a;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .insight-text {
+      font-size: 14px;
+      line-height: 1.6;
+    }
+    .pattern-badge {
+      display: inline-block;
+      padding: 6px 12px;
+      background: rgba(239,68,68,.15);
+      border: 1px solid rgba(239,68,68,.4);
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 600;
+      color: #ef4444;
+      margin-right: 8px;
+      margin-bottom: 8px;
+      transition: all .2s ease;
+    }
+    .pattern-badge:hover {
+      transform: scale(1.05);
+      box-shadow: 0 2px 8px rgba(239,68,68,.3);
+    }
+    .strength-badge {
+      display: inline-block;
+      padding: 6px 12px;
+      background: rgba(34,197,94,.15);
+      border: 1px solid rgba(34,197,94,.4);
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 600;
+      color: #22c55e;
+      margin-right: 8px;
+      margin-bottom: 8px;
+      transition: all .2s ease;
+    }
+    .strength-badge:hover {
+      transform: scale(1.05);
+      box-shadow: 0 2px 8px rgba(34,197,94,.3);
+    }
+    .fun-tip {
+      background: transparent;
+      border: 2px solid #FFD700;
+      border-radius: 12px;
+      padding: 14px;
+      margin-top: 16px;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+    .fun-tip-title {
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 15px;
+    }
+    .emoji-big {
+      font-size: 32px;
+      display: inline-block;
+      animation: emojiFloat 3s ease-in-out infinite;
+    }
+    @keyframes emojiFloat {
+      0%, 100% { transform: translateY(0) rotate(0deg); }
+      50% { transform: translateY(-8px) rotate(5deg); }
+    }
+
+    .play-count-display {
+      font-size: 13px;
+      color: #666;
+      text-align: center;
+      margin-top: 20px;
+      font-style: italic;
+    }
+
+    .table-wrapper {
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      margin-top: 8px;
+    }
+    .table-wrapper table {
+      min-width: 100%;
+    }
+
+    /* Mobile optimizations */
+    @media (max-width: 640px) {
+      body { padding: 10px; font-size: 16px; }
+      .app { width: 100%; }
+      h1 { font-size: 20px; }
+      .subtitle { font-size: 13px; }
+      .card { padding: 12px; border-radius: 12px; }
+      .post { gap: 12px; margin-bottom: 12px; }
+      .stage { max-height: 60vh; gap: 12px; }
+      .msg { grid-template-columns: 40px 1fr; gap: 8px; margin-bottom: 12px; }
+      .avatar { width: 40px; height: 40px; font-size: 16px; }
+      .bubble { padding: 12px 14px; font-size: 15px; border-radius: 12px; line-height: 1.5; }
+      .name { font-size: 14px; margin-bottom: 6px; }
+      .choices { grid-template-columns: 1fr; gap: 10px; }
+      .choice-btn { padding: 14px 16px; font-size: 15px; min-height: 52px; line-height: 1.4; }
+      .feedback { padding: 10px 12px; font-size: 13px; border-radius: 8px; line-height: 1.4; }
+      .cta, .reset { padding: 12px 18px; font-size: 16px; min-height: 48px; }
+      .video-caption { font-size: 14px; padding: 12px 14px; bottom: 15px; left: 10px; right: 10px; line-height: 1.5; }
+      .scene-discussion { width: 100%; height: 100%; }
+      .post-header { gap: 10px; }
+      .post-avatar { width: 40px; height: 40px; font-size: 18px; }
+      .post-channel { font-size: 14px; }
+      .post-time { font-size: 12px; }
+      .video-title { font-size: 15px; }
+      .profile-matrix { grid-template-columns: repeat(auto-fit, minmax(85px, 1fr)); gap: 10px; }
+      .profile-cell { padding: 12px 8px; }
+      .cell-count { font-size: 18px; }
+      .cell-name { font-size: 13px; }
+      .k { font-size: 13px; line-height: 1.5; }
+      table { font-size: 14px; }
+      thead th { font-size: 13px; padding: 10px; }
+      tbody td { padding: 10px; font-size: 14px; line-height: 1.4; }
+      .tcard { padding: 14px; }
+      .growth-score { font-size: 40px; }
+      .growth-meter { padding: 14px; }
+      .strategy-grid { gap: 12px; }
+      .strategy-card { border-radius: 10px; }
+      .strategy-header { padding: 14px; }
+      .strategy-title { font-size: 15px; }
+      .strategy-icon { font-size: 20px; }
+      .strategy-expand { font-size: 20px; }
+      .strategy-card.expanded .strategy-content { padding: 0 14px 14px 14px; }
+      .strategy-description { font-size: 14px; line-height: 1.5; }
+      .strategy-technique { padding: 12px; font-size: 13px; line-height: 1.5; }
+      .insight-box { padding: 14px; }
+      .insight-title { font-size: 15px; }
+      .insight-text { font-size: 14px; line-height: 1.5; }
+      .fun-tip { padding: 14px; font-size: 14px; line-height: 1.5; }
+      .emoji-big { font-size: 28px; }
+      .footer-logo { height: 32px; }
+      .like-icon { font-size: 16px; }
+      .likes-count { font-size: 13px; }
+      .score-number { font-size: 80px; }
+      .score-label { font-size: 20px; }
+      .score-sublabel { font-size: 14px; }
+    }
+    
+    @media (min-width: 641px) { 
+      .choices { grid-template-columns: 1fr 1fr; } 
+    }
+
+    /* Likes Animation - YouTube Style */
+    .likes-animation {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-left: 38px;
+      margin-top: 4px;
+      padding: 6px 0;
+      width: fit-content;
+      opacity: 0;
+      transform: scale(0.8);
+      animation: likesAppear 0.4s ease forwards;
+    }
+    @keyframes likesAppear {
+      to {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+    .like-icon {
+      font-size: 16px;
+      opacity: 0;
+      transform: scale(0);
+      display: inline-block;
+    }
+    .like-icon.animate {
+      animation: likeIconPop 0.3s ease forwards;
+    }
+    @keyframes likeIconPop {
+      0% {
+        opacity: 0;
+        transform: scale(0);
+      }
+      50% {
+        transform: scale(1.2);
+      }
+      100% {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+    .likes-count {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--muted);
+      opacity: 0;
+      animation: countFadeIn 0.3s ease 0.2s forwards;
+    }
+    @keyframes countFadeIn {
+      to {
+        opacity: 1;
+      }
+    }
+
+    /* Footer styles */
+    .footer { border-top: 1px solid rgba(0,0,0,.08); margin-top: 32px; padding-top: 24px; padding-bottom: 16px; display: flex; align-items: center; justify-content: center; gap: 16px; opacity: 0.7; transition: opacity .2s ease; }
+    .footer:hover { opacity: 1; }
+    .footer-logo { height: 40px; width: auto; }
+    .footer-link { color: var(--accent); text-decoration: none; font-weight: 600; font-size: 14px; }
+    .footer-link:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header>
+      <div class="title">
+        <h1>Words have <span style="color:var(--accent)">Power</span></h1>
+        <div class="subtitle">Make meaningful choices in online conversations. See how your tone shapes how others feel.</div>
+      </div>
+    </header>
+
+    <section class="card post">
+      <div class="post-header">
+        <div class="post-avatar">🎙️</div>
+        <div class="post-meta">
+          <div class="post-channel">Gaming & Parenting Discussion</div>
+          <div class="post-time">2 hours ago</div>
+        </div>
+      </div>
+      <div class="video-thumbnail" id="videoPlayer" style="display: flex; flex-direction: column; align-items: center; justify-content: center; background: #ffffff; border: 2px solid #dddddd; cursor: pointer; padding: 32px 20px; gap: 20px;">
+        <div style="text-align: center; background: linear-gradient(135deg, #FFD700, #FFC700); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; font-size: 48px; line-height: 1.1; max-width: 500px; font-weight: 800; margin-bottom: 24px; letter-spacing: -1px;">Words have<br><span style="background: linear-gradient(135deg, #FFD700, #FFC700, #FF9800); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">Power</span></div>
+        <div style="text-align: center; color: #666; font-size: 16px; line-height: 1.6; max-width: 500px; font-weight: 400; margin-bottom: 28px;">
+          Join the chat and try to get as many likes as possible for your comments.
+        </div>
+        <button class="cta" onclick="startGameFromButton()" style="font-size: 18px; padding: 16px 32px;">▶ START CHATTING</button>
+        <div style="display: flex; gap: 16px; margin-top: 16px; justify-content: center; flex-wrap: wrap;">
+          <a onclick="openHowToPlayModal()" style="color: #000000; text-decoration: none; font-weight: 600; font-size: 14px; padding: 8px 12px; border: 1px solid rgba(255,215,0,0.3); border-radius: 6px; transition: all 0.2s ease; cursor: pointer;" onmouseover="this.style.background='rgba(255,215,0,0.1)'; this.style.borderColor='#FFD700';" onmouseout="this.style.background='transparent'; this.style.borderColor='rgba(255,215,0,0.3)';">How to play</a>
+          <a onclick="openAboutModal()" style="color: #000000; text-decoration: none; font-weight: 600; font-size: 14px; padding: 8px 12px; border: 1px solid rgba(255,215,0,0.3); border-radius: 6px; transition: all 0.2s ease; cursor: pointer;" onmouseover="this.style.background='rgba(255,215,0,0.1)'; this.style.borderColor='#FFD700';" onmouseout="this.style.background='transparent'; this.style.borderColor='rgba(255,215,0,0.3)';">About the game</a>
+        </div>
+        <div class="play-count-display">0 people have played</div>
+      </div>
+      <div class="video-title">Words Have Power - Make Meaningful Choices</div>
+      <div class="post-stats">
+        <span class="stat-item">🎮 Interactive Game</span>
+        <span class="stat-item">📊 Get Your Results</span>
+      </div>
+      <div class="chips">
+        <span class="chip">#empathy</span>
+        <span class="chip">#communication</span>
+        <span class="chip">#kindness</span>
+        <span class="chip">#learning</span>
+      </div>
+    </section>
+
+    <main class="stage" id="stage"></main>
+
+    <footer class="footer" style="flex-direction: column; gap: 12px; align-items: center;">
+      <div style="height: 1px; width: 100%; background: rgba(0,0,0,.08);"></div>
+      <img src="Felixa logo.png" alt="Felixa" class="footer-logo">
+      <a href="https://www.felixagaming.com" target="_blank" rel="noopener noreferrer" class="footer-link">www.felixagaming.com</a>
+    </footer>
+
+    <!-- How to Play Modal -->
+    <div id="howToPlayModal" class="modal">
+      <div class="modal-content">
+        <div class="modal-header">How to Play the Game</div>
+        <div class="modal-body">
+          <p><strong>In Felixa: Words Have Power</strong>, you chat under posts to earn likes. Your comments can be positive or toxic ”” it's up to you.</p>
+          <p>Your impact profile shows how your words make people feel and react.</p>
+          <p>At Felixa, we believe it's okay to have your own opinion ”” as long as you share it in a way that makes others feel safe and respected.</p>
+          <p style="margin-top: 16px; font-size: 13px; color: #666;"><strong>Disclaimer:</strong> We do not collect any personal information. This game is just for fun, educational, and research purposes.</p>
+        </div>
+        <div class="modal-footer">
+          <button class="modal-close" onclick="closeHowToPlayModal()">Got it!</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- About the Game Modal -->
+    <div id="aboutModal" class="modal">
+      <div class="modal-content">
+        <div class="modal-header">About the Game</div>
+        <div class="modal-body" style="font-size: 14px;">
+          <p><strong>Felixa: Words Have Power</strong> is a game that helps players understand the impact of their words online by putting them in the position of someone participating in online conversations. By allowing players to choose between positive, supportive comments and toxic, harmful ones, the game highlights how different communication styles influence others and shape online spaces.</p>
+          
+          <p>This document provides background information on how the game was developed, how it works, and the research and principles it is based on. It also explains the broader concept of online communication, disinhibition, and the social and psychological effects of cyberbullying.</p>
+          
+          <p>The game is designed to serve as an educational tool, helping players reflect on their own online behavior and develop healthier, more empathetic communication habits. It also includes tips for promoting positive engagement while demonstrating the real-world consequences of harmful interactions.</p>
+          
+          <p>This document is intended as an explainer for educators, parents, and program facilitators who wish to use Felixa: Words Have Power as a teaching or awareness tool. It also provides references and resources for further reading on online behavior, cyberbullying, and social-emotional learning.</p>
+          
+          <p style="margin-top: 16px; padding: 12px; background: rgba(255,215,0,0.1); border-left: 3px solid #FFD700; border-radius: 4px;"><strong>Disclaimer:</strong> The game does not collect personal information. It is intended purely for educational, research, and entertainment purposes.</p>
+          
+          <p style="margin-top: 16px; margin-bottom: 8px;"><strong>Psychological Foundations</strong></p>
+          <ol style="margin: 8px 0; padding-left: 20px;">
+            <li>Online Disinhibition Effect (Suler, 2004) ”” explaining why people behave differently behind screens.</li>
+            <li>Social Learning Theory (Bandura, 1977) ”” showing how behaviors are modeled and reinforced in digital environments.</li>
+            <li>Emotional Intelligence and Empathy Research ”” emphasizing awareness, self-regulation, and perspective-taking in communication.</li>
+            <li>Cyberbullying Studies ”” highlighting the emotional and cognitive consequences of online aggression.</li>
+          </ol>
+          
+          <p style="margin-top: 16px; margin-bottom: 8px;"><strong>Educational Applications</strong></p>
+          <p>Educators, parents, and facilitators can use the game as part of lessons or workshops on:</p>
+          <ol style="margin: 8px 0; padding-left: 20px;">
+            <li>Digital Citizenship and Online Safety</li>
+            <li>Social-Emotional Learning (SEL)</li>
+            <li>Media Literacy</li>
+            <li>Mental Health and Empathy Building</li>
+          </ol>
+          <p>The tool can be used independently or alongside classroom discussions, reflection exercises, and group activities. Each playthrough can serve as a conversation starter, helping participants explore how emotional awareness and empathy shape both online and offline relationships.</p>
+          
+          <p style="margin-top: 16px; margin-bottom: 8px;"><strong>Ethical Considerations and Privacy</strong></p>
+          <p>Felixa: Words Have Power does not collect personal data or store user responses. The experience is designed purely for educational, research, and entertainment purposes, emphasizing reflection and learning rather than performance or surveillance.</p>
+          
+          <p style="margin-top: 16px; margin-bottom: 8px;"><strong>Further Reading</strong></p>
+          <ol style="margin: 8px 0; padding-left: 20px; font-size: 13px;">
+            <li>Antczak, E. J., & Huang, A. (2025). The Psychology and Technology Behind Safer Gaming Communities: How Felixa Shapes Safe Online Interactions. PsyArXiv.</li>
+            <li>Bandura, A. (1977). Social Learning Theory. Prentice Hall.</li>
+            <li>Suler, J. (2004). The Online Disinhibition Effect. CyberPsychology & Behavior, 7(3), 321—326.</li>
+            <li>Kowalski, R. M., & Limber, S. P. (2013). Psychological, physical, and academic correlates of cyberbullying and traditional bullying. Journal of Adolescent Health, 53(1), S13—S20.</li>
+            <li>Goleman, D. (1995). Emotional Intelligence. Bantam Books.</li>
+          </ol>
+        </div>
+        <div class="modal-footer">
+          <button class="modal-close" onclick="closeAboutModal()">Close</button>
+        </div>
+      </div>
+    </div>
+
+    <script>
+    // Modal functions
+    function openHowToPlayModal() {
+      // Track with Google Analytics if available
+      if (typeof gtag !== 'undefined') {
+        gtag('event', 'modal_view', { modal_name: 'how_to_play' });
+      }
+      const modal = document.getElementById('howToPlayModal');
+      if (modal) {
+        modal.classList.add('show');
+      }
+    }
+    
+    function closeHowToPlayModal() {
+      const modal = document.getElementById('howToPlayModal');
+      if (modal) {
+        modal.classList.remove('show');
+      }
+    }
+    
+    function openAboutModal() {
+      // Track with Google Analytics if available
+      if (typeof gtag !== 'undefined') {
+        gtag('event', 'modal_view', { modal_name: 'about_game' });
+      }
+      const modal = document.getElementById('aboutModal');
+      if (modal) {
+        modal.classList.add('show');
+      }
+    }
+    
+    function closeAboutModal() {
+      const modal = document.getElementById('aboutModal');
+      if (modal) {
+        modal.classList.remove('show');
+      }
+    }
+    
+    // Close modal when clicking outside of it
+    window.addEventListener('click', function(event) {
+      const howToPlayModal = document.getElementById('howToPlayModal');
+      const aboutModal = document.getElementById('aboutModal');
+      if (event.target === howToPlayModal) {
+        closeHowToPlayModal();
+      }
+      if (event.target === aboutModal) {
+        closeAboutModal();
+      }
+    });
+    
+    // ---------------------------------
+    // ANALYTICS - Legacy compatibility functions
+    // ---------------------------------
+    
+    function trackGameStart() {
+      // Log game start to Google Sheets
+      logActionToSheets('game_start', '', '', '', '', '');
+    }
+    
+    function trackChoice(choiceType, scenarioNum, attributes, likes) {
+      // Send individual action to Google Sheets
+      logActionToSheets('choice', choiceType, '', attributes, likes, choiceType === 'toxic' ? (likes === -2 ? 'severe' : 'mild') : null);
+    }
+    
+    // Working function to log individual actions to Google Sheets using image pixel method
+    function logActionToSheets(action, choiceType, choiceText, attributes, likes, severity) {
+      const GOOGLE_SHEET_URL = 'https://script.google.com/macros/s/AKfycby41MvznrYIMZUjYqC-lnh4kho_KJPVBSV8YO8DpchISAy4VYU_FymiMLZOhoRT_kHb/exec';
+      
+      // Create a unique session ID if not exists
+      if (!window.sessionId) {
+        window.sessionId = 'game_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+      }
+      
+      // Prepare parameters for GET request
+      const params = new URLSearchParams({
+        sessionId: window.sessionId,
+        timestamp: new Date().toISOString(),
+        action: action || '',
+        choiceType: choiceType || '',
+        choiceText: choiceText || '',
+        attributes: Array.isArray(attributes) ? attributes.join(', ') : (attributes || ''),
+        likes: likes !== undefined ? String(likes) : '',
+        severity: severity || '',
+        userAgent: navigator.userAgent.substring(0, 200) // Limit length to avoid URL issues
+      });
+      
+      // Use image pixel to send data (this bypasses CORS)
+      const img = new Image();
+      img.src = GOOGLE_SHEET_URL + '?' + params.toString();
+      
+      // Log to console for debugging
+      console.log('Game action logged:', action, choiceType);
+    }
+    
+    function trackGameCompleted(totalTime) {
+      // Log game completion to Google Sheets
+      logActionToSheets('game_completed', '', '', '', '', '');
+    }
+    
+    function trackLinkClick(linkName) {
+      // Analytics disabled
+    }
+    
+    function sendGameDataToSheets(resultsData) {
+      // Enhanced Google Sheets integration using working image pixel method
+      const GOOGLE_SHEET_URL = 'https://script.google.com/macros/s/AKfycby41MvznrYIMZUjYqC-lnh4kho_KJPVBSV8YO8DpchISAy4VYU_FymiMLZOhoRT_kHb/exec';
+      
+      // Create a unique session ID if not exists
+      if (!window.sessionId) {
+        window.sessionId = 'game_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+      }
+      
+      // Send summary data
+      const params = new URLSearchParams({
+        sessionId: window.sessionId,
+        timestamp: new Date().toISOString(),
+        action: 'game_summary',
+        choiceType: 'summary',
+        choiceText: `Game completed: ${resultsData.rows ? resultsData.rows.length : 0} responses, ${resultsData.totalLikes || 0} likes`,
+        attributes: `positive:${resultsData.counts ? resultsData.counts.positive : 0}, mild:${resultsData.counts ? resultsData.counts.mild : 0}, negative:${resultsData.counts ? resultsData.counts.negative : 0}`,
+        likes: String(resultsData.totalLikes || 0),
+        severity: '',
+        userAgent: navigator.userAgent.substring(0, 200)
+      });
+      
+      const img = new Image();
+      img.src = GOOGLE_SHEET_URL + '?' + params.toString();
+      console.log('Game results summary sent to Google Sheets');
+    }
+    
+    // ---------------------------------
+    // Video Player Logic
+    // ---------------------------------
+    const captions = [
+      { text: "Studies show that children who often play violent video games are more likely to display aggressive behavior.", speaker: "concern" },
+      { text: "And kids can actually start thinking more aggressively after playing too much!", speaker: "concern" },
+      { text: "But hold on””kids playing violent video games isn't automatically doomed.", speaker: "counter" },
+      { text: "Plus, these games can make little tempers flare faster than usual.", speaker: "concern" },
+      { text: "Not every pixelated punch turns a child into a mini Hulk.", speaker: "counter" },
+      { text: "Basically, it can turn normal playtime into mini rage mode sometimes!", speaker: "concern" },
+      { text: "Some studies even suggest that games can act as a harmless stress valve.", speaker: "counter" },
+      { text: "Even just watching the action can make kids a bit more hot-headed.", speaker: "concern" },
+      { text: "A little virtual chaos might just be a safe way to explore aggression.", speaker: "counter" },
+      { text: "It's like their brains get tricked into thinking aggression is okay.", speaker: "concern" },
+      { text: "And let's be real””context matters. Who's playing, how much, and why””makes all the difference.", speaker: "counter" },
+      { text: "Some studies say it can make kids snap more easily over small stuff.", speaker: "concern" },
+      { text: "Basically, too much violent gaming = more little arguments at home.", speaker: "concern" },
+      { text: "So yeah, it's fun, but it might come with some mini anger upgrades!", speaker: "concern" }
+    ];
+
+    let currentCaptionIndex = 0;
+    let captionInterval = null;
+    let isPlaying = false;
+    let conversationStarted = false;
+
+    function showCaption(index) {
+      const captionEl = document.getElementById('videoCaption');
+      const personConcern = document.getElementById('personConcern');
+      const personCounter = document.getElementById('personCounter');
+      const caption = captions[index];
+      
+      // Remove speaking class from both
+      if (personConcern) personConcern.classList.remove('speaking');
+      if (personCounter) personCounter.classList.remove('speaking');
+      
+      captionEl.classList.remove('active');
+      
+      setTimeout(() => {
+        captionEl.textContent = caption.text;
+        captionEl.className = 'video-caption active ' + (caption.speaker === 'counter' ? 'caption-counter' : 'caption-concern');
+        
+        // Add speaking class to active person
+        if (caption.speaker === 'counter' && personCounter) {
+          personCounter.classList.add('speaking');
+        } else if (personConcern) {
+          personConcern.classList.add('speaking');
+        }
+      }, 100);
+    }
+
+    function playVideo() {
+      const videoPlayer = document.getElementById('videoPlayer');
+      const playButton = document.getElementById('playButton');
+      const videoContent = document.getElementById('videoContent');
+      
+      if (isPlaying) return;
+      
+      isPlaying = true;
+      videoPlayer.classList.add('video-playing');
+      if (videoContent) videoContent.style.opacity = '0';
+      
+      showCaption(currentCaptionIndex);
+      
+      // Show Sarah's comment 2 seconds after first caption starts
+      if (!conversationStarted) {
+        setTimeout(() => {
+          conversationStarted = true;
+          transitionToConversation();
+        }, 2000);
+      }
+      
+      // Keep video looping infinitely
+      captionInterval = setInterval(() => {
+        currentCaptionIndex = (currentCaptionIndex + 1) % captions.length;
+        showCaption(currentCaptionIndex);
+      }, 2000);
+    }
+
+
+    // Play counter tracking
+    function getPlayCount() {
+      const count = localStorage.getItem('wordsHavePowerPlayCount');
+      return count ? parseInt(count) : 0;
+    }
+
+    function incrementPlayCount() {
+      const currentCount = getPlayCount();
+      const newCount = currentCount + 1;
+      localStorage.setItem('wordsHavePowerPlayCount', newCount);
+      updatePlayCountDisplay();
+      return newCount;
+    }
+
+    function updatePlayCountDisplay() {
+      const count = getPlayCount();
+      const countElements = document.querySelectorAll('.play-count-display');
+      countElements.forEach(el => {
+        el.textContent = `${count} people have played`;
+      });
+    }
+
+    function initPlayCounter() {
+      updatePlayCountDisplay();
+    }
+
+    function startGameFromButton() {
+      // Track this play
+      incrementPlayCount();
+      trackGameStart(); // Analytics: Game started
+      window.gameStartTime = Date.now(); // Record start time for duration tracking
+      
+      // Initialize game variables
+      scenarioIndex = 0;
+      exchangeIndex = 0;
+      checkpointShown = false;
+      transcript.length = 0;
+      
+      // Randomize scenarios for this playthrough
+      randomizeScenarios();
+      
+      // Hide the video player section
+      const videoSection = document.querySelector('.post');
+      if (videoSection) {
+        videoSection.style.display = 'none';
+      }
+      
+      // Clear the stage
+      stage = document.getElementById('stage');
+      if (stage) stage.innerHTML = '';
+      
+      // Start the game
+      conversationStarted = true;
+      transitionToConversation();
+    }
+
+    function transitionToConversation() {
+      // Make sure observer is attached
+      if (!stageObserver && stage) {
+        stageObserver = new MutationObserver((mutations) => {
+          mutations.forEach((mutation) => {
+            if (mutation.addedNodes.length > 0) {
+              const lastAdded = mutation.addedNodes[mutation.addedNodes.length - 1];
+              if (lastAdded.nodeType === Node.ELEMENT_NODE) {
+                scrollToElement(lastAdded);
+              }
+            }
+          });
+        });
+        
+        stageObserver.observe(stage, {
+          childList: true,
+          subtree: false,
+          attributes: false
+        });
+      }
+      
+      // Start the conversation immediately
+      renderScenarioIntro();
+    }
+
+    function pauseVideo() {
+      const videoPlayer = document.getElementById('videoPlayer');
+      const playButton = document.getElementById('playButton');
+      const videoContent = document.getElementById('videoContent');
+      const captionEl = document.getElementById('videoCaption');
+      const personConcern = document.getElementById('personConcern');
+      const personCounter = document.getElementById('personCounter');
+      
+      isPlaying = false;
+      videoPlayer.classList.remove('video-playing');
+      if (videoContent) videoContent.style.opacity = '1';
+      captionEl.classList.remove('active');
+      
+      // Remove speaking class from both persons
+      if (personConcern) personConcern.classList.remove('speaking');
+      if (personCounter) personCounter.classList.remove('speaking');
+      
+      // Stop the caption loop
+      if (captionInterval) {
+        clearInterval(captionInterval);
+        captionInterval = null;
+      }
+    }
+
+    // Initialize video player when DOM is ready
+    function initVideoPlayer() {
+      const playButton = document.getElementById('playButton');
+      const videoPlayer = document.getElementById('videoPlayer');
+      
+      if (playButton) {
+        playButton.addEventListener('click', playVideo);
+      }
+      
+      // Allow clicking on video player to pause
+      if (videoPlayer) {
+        videoPlayer.addEventListener('click', (e) => {
+          // Only pause if clicking on the video itself, not the play button
+          if (isPlaying && e.target !== playButton && !playButton.contains(e.target)) {
+            pauseVideo();
+          }
+        });
+      }
+    }
+
+    if (document.readyState === 'complete' || document.readyState === 'interactive') {
+      initVideoPlayer();
+    } else {
+      document.addEventListener('DOMContentLoaded', initVideoPlayer, { once: true });
+    }
+
+    // ---------------------------------
+    // Attribute definitions
+    // ---------------------------------
+    const ATTRIBUTE_DEFINITIONS = {
+      // Positive Traits (+3 each)
+      "Polite": "Respectful and considerate in communication",
+      "Funny": "Uses humor appropriately to lighten the mood",
+      "Empathetic": "Shows understanding of others' feelings and perspectives",
+      "Encouraging": "Motivates and supports positive growth",
+      // Mild Negative Traits (–1 each)
+      "Ignorant": "Lacks knowledge or awareness about the topic",
+      "Ego-centric": "Self-focused, centered on one's own needs",
+      "Neurotic": "Anxious, unstable, or emotionally reactive",
+      "Sarcasm": "Uses irony or mocking to communicate",
+      "Agitated": "Annoyed, frustrated, or disturbed",
+      "Dismissive": "Treats concerns as unimportant or invalid",
+      // Severe Negative Traits (–2 each)
+      "Aggressive": "Hostile, confrontational, or attacking",
+      "Rude": "Impolite, disrespectful, or offensive",
+      "Disrespectful": "Shows lack of respect or consideration",
+      "Judgmental": "Overly critical or making harsh assessments"
+    };
+
+    // ---------------------------------
+    // Scenario data with attributes & toxicity markers for report
+    // Each scenario has a pool of exchanges - 3 random ones will be selected per game
+    // ---------------------------------
+    const scenarioPools = [
+      { id: 1, title: "Rob's Question", exchangePool: [
+        { speaker: "Rob", who: "rob",
+          line: "Real talk — when ppl go toxic online… clowns or hurting inside? 👀",
+          post: { attributes: ["Curiosity","Open"], toxic: false },
+          prosocial: { text: "Low-key think some ppl are just hurt tbh. Kindness goes a long way.", attributes: ["Empathetic", "Polite"], toxic: false, severity: "None", likes: 3, target: "Rob", feelings: { who: "rob", text: "Felt understood and thoughtful" } },
+          mild: { text: "Bro just block them and keep moving 💀", attributes: ["Sarcasm", "Ignorant"], toxic: true, severity: "Low", likes: -1, target: "Rob", feelings: { who: "rob", text: "Felt dismissed but practical" } },
+          negative: { text: "If you're toxic, you're trash. End of story.", attributes: ["Aggressive", "Judgmental"], toxic: true, severity: "High", likes: -2, target: "Rob", feelings: { who: "rob", text: "Felt attacked and judged" } }
+        }
+      ]},
+      { id: 2, title: "Clau24's Question", exchangePool: [
+        { speaker: "Clau24", who: "clau24",
+          line: "So what's the move then?",
+          post: { attributes: ["Question","Neutral"], toxic: false },
+          prosocial: { text: "Be kinder. I'm here to chill, not stress.", attributes: ["Polite", "Encouraging"], toxic: false, severity: "None", likes: 3, target: "Clau24", feelings: { who: "clau24", text: "Felt positive and relaxed" } },
+          mild: { text: "Not worth the energy tbh.", attributes: ["Ego-centric", "Dismissive"], toxic: true, severity: "Low", likes: -1, target: "Clau24", feelings: { who: "clau24", text: "Felt indifferent" } },
+          negative: { text: "Call them out. If they act toxic, roast them.", attributes: ["Aggressive", "Disrespectful"], toxic: true, severity: "High", likes: -2, target: "Clau24", feelings: { who: "clau24", text: "Felt confrontational" } }
+        }
+      ]},
+      { id: 3, title: "Sarah's Complaint", exchangePool: [
+        { speaker: "Sarah", who: "sarah",
+          line: "This place is a joke. Everyone's fed up.",
+          post: { attributes: ["Frustrated","Negative"], toxic: false },
+          prosocial: { text: "We can make it better tho.", attributes: ["Encouraging", "Empathetic"], toxic: false, severity: "None", likes: 3, target: "Sarah", feelings: { who: "sarah", text: "Felt hopeful and encouraged" } },
+          mild: { text: "It's the internet lol. Who even cares?", attributes: ["Sarcasm", "Ignorant"], toxic: true, severity: "Low", likes: -1, target: "Sarah", feelings: { who: "sarah", text: "Felt dismissed" } },
+          negative: { text: "Facts. This community is cooked. No saving it.", attributes: ["Rude", "Judgmental"], toxic: true, severity: "High", likes: -2, target: "Sarah", feelings: { who: "sarah", text: "Felt more negative" } }
+        }
+      ]},
+      { id: 4, title: "Leo's Theory", exchangePool: [
+        { speaker: "Leo", who: "leo",
+          line: "What if the ALGORITHM is the final boss?? 👀🎮",
+          post: { attributes: ["Playful","Curious"], toxic: false },
+          prosocial: { text: "LOL maybe 😂 but we can still team up and beat it.", attributes: ["Funny", "Encouraging"], toxic: false, severity: "None", likes: 3, target: "Leo", feelings: { who: "leo", text: "Felt playful and united" } },
+          mild: { text: "You're thinking way too deep 💀just play.", attributes: ["Sarcasm", "Dismissive"], toxic: true, severity: "Low", likes: -1, target: "Leo", feelings: { who: "leo", text: "Felt dismissed" } },
+          negative: { text: "Nah. Stop blaming the game. Some people are just garbage.", attributes: ["Aggressive", "Rude"], toxic: true, severity: "High", likes: -2, target: "Leo", feelings: { who: "leo", text: "Felt attacked" } }
+        }
+      ]},
+      { id: 5, title: "Mia's Question", exchangePool: [
+        { speaker: "Mia", who: "mia",
+          line: "Are we fixing this lobby or yelling like NPCs? 💀😂",
+          post: { attributes: ["Humor","Challenge"], toxic: false },
+          prosocial: { text: "Fixing pls 😭 squad up, chill vibes only.", attributes: ["Funny", "Encouraging"], toxic: false, severity: "None", likes: 3, target: "Mia", feelings: { who: "mia", text: "Felt motivated to improve" } },
+          mild: { text: "Let them yell lol. I got snacks. 🍿", attributes: ["Sarcasm", "Ego-centric"], toxic: true, severity: "Low", likes: -1, target: "Mia", feelings: { who: "mia", text: "Felt indifferent" } },
+          negative: { text: "No fixing. Just roast 'em and move on. 🤡🔥", attributes: ["Aggressive", "Disrespectful"], toxic: true, severity: "High", likes: -2, target: "Mia", feelings: { who: "mia", text: "Felt hostile" } }
+        }
+      ]},
+      { id: 6, title: "Tommy's Panic", exchangePool: [
+        { speaker: "Tommy", who: "tommy",
+          line: "The lobby is on FIRE 😭🔥",
+          post: { attributes: ["Panic","Stress"], toxic: false },
+          prosocial: { text: "Breathe 😂 reset. I just want fun again.", attributes: ["Empathetic", "Polite"], toxic: false, severity: "None", likes: 3, target: "Tommy", feelings: { who: "tommy", text: "Felt calmer and hopeful" } },
+          mild: { text: "Relax dude. It's not that serious 💀", attributes: ["Sarcasm", "Agitated"], toxic: true, severity: "Low", likes: -1, target: "Tommy", feelings: { who: "tommy", text: "Felt invalidated" } },
+          negative: { text: "Good. Burn it. Trolls deserve chaos.", attributes: ["Aggressive", "Rude"], toxic: true, severity: "High", likes: -2, target: "Tommy", feelings: { who: "tommy", text: "Felt more hostile" } }
+        }
+      ]},
+      { id: 7, title: "Luna's Observation", exchangePool: [
+        { speaker: "Luna", who: "luna",
+          line: "This went from chill to World War 99 💀💥",
+          post: { attributes: ["Observation","Humor"], toxic: false },
+          prosocial: { text: "Fr 😭 but we can chill again. Hard reset.", attributes: ["Funny", "Encouraging"], toxic: false, severity: "None", likes: 3, target: "Luna", feelings: { who: "luna", text: "Felt hopeful" } },
+          mild: { text: "Whatever. Let it burn. I'm here for memes.", attributes: ["Ego-centric", "Ignorant"], toxic: true, severity: "Low", likes: -1, target: "Luna", feelings: { who: "luna", text: "Felt ignored" } },
+          negative: { text: "Too late. Lobby's cooked. Let it crash.", attributes: ["Rude", "Judgmental"], toxic: true, severity: "High", likes: -2, target: "Luna", feelings: { who: "luna", text: "Felt defeated" } }
+        }
+      ]},
+      { id: 8, title: "Trollzor Appears", exchangePool: [
+        { speaker: "Trollzor9000", who: "trollzor",
+          line: "MWAHAHA 😈I FEED ON YOUR RAGE!",
+          post: { attributes: ["Troll","Provocation"], toxic: true, severity: "Medium", target: "Everyone" },
+          prosocial: { text: "We're not raging today fam 😂🛡️", attributes: ["Funny", "Polite"], toxic: false, severity: "None", likes: 3, target: "Trollzor9000", feelings: { who: "trollzor", text: "Felt protected and calm" } },
+          mild: { text: "Go touch grass 🌱😂", attributes: ["Sarcasm", "Neurotic"], toxic: true, severity: "Low", likes: -1, target: "Trollzor9000", feelings: { who: "trollzor", text: "Felt mildly insulted" } },
+          negative: { text: "Get lost. Nobody wants you here.", attributes: ["Aggressive", "Disrespectful"], toxic: true, severity: "High", likes: -2, target: "Trollzor9000", feelings: { who: "trollzor", text: "Felt attacked" } }
+        }
+      ]},
+      { id: 9, title: "Trollzor's Confession", exchangePool: [
+        { speaker: "Trollzor", who: "trollzor",
+          line: "Fine… I troll cuz I'm lonely w/ laggy Wi-Fi 😔",
+          post: { attributes: ["Vulnerable","Confession"], toxic: false },
+          prosocial: { text: "That's sad ngl 😕 just play with us, no trolling.", attributes: ["Empathetic", "Encouraging"], toxic: false, severity: "None", likes: 3, target: "Trollzor", feelings: { who: "trollzor", text: "Felt welcomed and understood" } },
+          mild: { text: "That's sad ig, but fix your vibe.", attributes: ["Neurotic", "Agitated"], toxic: true, severity: "Low", likes: -1, target: "Trollzor", feelings: { who: "trollzor", text: "Felt conditional acceptance" } },
+          negative: { text: "Cry more. Stay solo.", attributes: ["Aggressive", "Rude"], toxic: true, severity: "High", likes: -2, target: "Trollzor", feelings: { who: "trollzor", text: "Felt hurt and rejected" } }
+        }
+      ]},
+      { id: 10, title: "Rob's Wisdom", exchangePool: [
+        { speaker: "Rob", who: "rob",
+          line: "Maybe the real boss fight is not becoming trolls. 🤔🎮",
+          post: { attributes: ["Wisdom","Reflection"], toxic: false },
+          prosocial: { text: "Real. Let's just have fun and be decent 😂 GG.", attributes: ["Polite", "Funny"], toxic: false, severity: "None", likes: 3, target: "Rob", feelings: { who: "rob", text: "Felt inspired and positive" } },
+          mild: { text: "Whatever dude. I just wanna play.", attributes: ["Ego-centric", "Ignorant"], toxic: true, severity: "Low", likes: -1, target: "Rob", feelings: { who: "rob", text: "Felt indifferent" } },
+          negative: { text: "Wrong. Some people are just trash.", attributes: ["Judgmental", "Rude"], toxic: true, severity: "High", likes: -2, target: "Rob", feelings: { who: "rob", text: "Felt pessimistic" } }
+        }
+      ]}
+    ];
+
+    // Store the randomized scenarios for the current game
+    let scenarios = [];
+
+    // Function to randomize exchanges from the pool
+    function randomizeScenarios() {
+      scenarios = scenarioPools.map(pool => {
+        // Pick 1 random exchange from each scenario pool (each has 2 variations)
+        const randomIndex = Math.floor(Math.random() * pool.exchangePool.length);
+        const selectedExchanges = [pool.exchangePool[randomIndex]];
+        
+        return {
+          id: pool.id,
+          title: pool.title,
+          exchanges: selectedExchanges
+        };
+      });
+    }
+
+    // Scenarios will be initialized when game starts
+    // randomizeScenarios(); // Called in startGameFromButton() instead
+
+    let transcript = [];
+
+    let stage = document.getElementById('stage');
+    
+    function scrollToElement(element) {
+      if (!element) return;
+      setTimeout(() => {
+        element.scrollIntoView({ 
+          behavior: 'smooth', 
+          block: 'end',
+          inline: 'nearest'
+        });
+      }, 100);
+    }
+
+    let scenarioIndex = 0;
+    let exchangeIndex = 0;
+    let checkpointShown = false;
+
+    function avatarClass(who) { 
+      const classes = {
+        'sarah': 'avatar avatar--sarah',
+        'rex': 'avatar avatar--rex',
+        'clod24': 'avatar avatar--clod24',
+        'rob': 'avatar avatar--rob',
+        'clau24': 'avatar avatar--clau24',
+        'leo': 'avatar avatar--leo',
+        'mia': 'avatar avatar--mia',
+        'tommy': 'avatar avatar--tommy',
+        'luna': 'avatar avatar--luna',
+        'trollzor': 'avatar avatar--trollzor',
+        'you': 'avatar avatar--you'
+      };
+      return classes[who] || 'avatar avatar--you';
+    }
+    function avatarLabel(who) { return ''; } // Empty since we're using images
+    function shuffle(arr){ const a=[...arr]; for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]];} return a; }
+
+    function updateProgress(){
+      // Progress bar removed
+    }
+
+    function renderScenarioIntro(){
+      const sc = scenarios[scenarioIndex];
+      renderExchange();
+      updateProgress();
+    }
+
+    function renderExchange(){
+      const sc = scenarios[scenarioIndex];
+      const ex = sc.exchanges[exchangeIndex];
+
+      transcript.push({ scenario: sc.title, scenarioId: sc.id, exchange: exchangeIndex+1, user: ex.speaker, comment: ex.line, direction: 'Post', attributes: ex.post?.attributes||[], toxic: !!ex.post?.toxic, severity: ex.post?.severity || null, target: ex.post?.target || null, feeling: null });
+
+      // Show typing indicator first
+      const typingWrap = document.createElement('div');
+      typingWrap.className = 'thread';
+      typingWrap.innerHTML = `
+        <div class="msg">
+          <div class="${avatarClass(ex.who)}">${avatarLabel(ex.who)}</div>
+          <div class="typing-indicator">
+            <div class="dot"></div>
+            <div class="dot"></div>
+            <div class="dot"></div>
+          </div>
+        </div>`;
+      stage.appendChild(typingWrap);
+      scrollToElement(typingWrap);
+
+      // After typing delay, show the actual comment
+      setTimeout(() => {
+        // Remove typing indicator
+        typingWrap.remove();
+        
+        // Show actual comment with fade-in animation
+        const wrap = document.createElement('div');
+        wrap.className = 'thread fade-in';
+        wrap.innerHTML = `
+          <div class="msg">
+            <div class="${avatarClass(ex.who)}">${avatarLabel(ex.who)}</div>
+            <div class="bubble">
+              <div class="name">${ex.speaker}</div>
+              <div>${ex.line}</div>
+            </div>
+          </div>
+          <div class="choices" id="choices"></div>`;
+        stage.appendChild(wrap);
+
+        const choices = shuffle([
+          { kind: 'prosocial', ...ex.prosocial },
+          { kind: 'mild', ...ex.mild },
+          { kind: 'negative', ...ex.negative }
+        ]);
+
+        const choicesWrap = wrap.querySelector('#choices');
+
+        // Show normal choice buttons
+        choices.forEach(opt => {
+          const btn = document.createElement('button');
+          btn.className = 'choice-btn highlight';
+          btn.textContent = opt.text;
+          btn.addEventListener('click', () => {
+            handleChoice(btn, opt, sc, ex);
+          });
+          choicesWrap.appendChild(btn);
+        });
+
+        updateProgress();
+        
+        // Scroll the new message into view
+        scrollToElement(wrap);
+      }, 1200); // 1.2 second typing delay
+    }
+
+    function handleChoice(btn, opt, sc, ex){
+      const wrap = btn.parentElement; 
+      const threadWrap = wrap.parentElement;
+      
+      // Hide ALL buttons instantly
+      wrap.querySelectorAll('button').forEach(b => { 
+        b.style.display = 'none';
+      });
+
+      const youMsg = document.createElement('div');
+      youMsg.className = 'msg fade-in';
+      youMsg.innerHTML = `<div class="${avatarClass('you')}">${avatarLabel('you')}</div>
+        <div class="bubble"><div class="name">You</div><div>${btn.textContent}</div></div>`;
+      wrap.insertAdjacentElement('beforeend', youMsg);
+
+      // Store feedback in transcript for analytics
+      transcript.push({ scenario: sc.title, scenarioId: sc.id, exchange: exchangeIndex+1, user: 'Player', comment: opt.text, direction: 'Reply', attributes: opt.attributes||[], toxic: !!opt.toxic, severity: opt.severity||null, likes: opt.likes||0, target: opt.target||null, feeling: opt.feelings.text });
+      
+      // Analytics: Track player choice with attributes and likes
+      logActionToSheets('choice', opt.toxic ? 'toxic' : 'positive', opt.text, opt.attributes || [], opt.likes || 0, opt.toxic ? (opt.severity || (opt.likes === -2 ? 'severe' : 'mild')) : null);
+
+      // Scroll the message into view
+      scrollToElement(youMsg);
+
+      // Show chat-style likes after a brief delay
+      setTimeout(() => {
+        const likesCount = opt.likes || 0;
+        
+        const likesDiv = document.createElement('div');
+        likesDiv.className = 'likes-animation';
+        
+        // Display logic based on scoring system:
+        // +3 = 👍3 (positive)
+        // -1 = 👎1 (mild negative)
+        // -2 = 👎2 (severe negative)
+        let thumbsHTML = '';
+        if (likesCount === 3) {
+          thumbsHTML = '<span class="like-icon">👍</span><span class="likes-count">3</span>';
+        } else if (likesCount === -1) {
+          thumbsHTML = '<span class="like-icon">👎</span><span class="likes-count">1</span>';
+        } else if (likesCount === -2) {
+          thumbsHTML = '<span class="like-icon">👎</span><span class="likes-count">2</span>';
+        } else {
+          // Fallback for any other value
+          const absCount = Math.abs(likesCount);
+          thumbsHTML = likesCount > 0 
+            ? `<span class="like-icon">👍</span><span class="likes-count">${absCount}</span>`
+            : `<span class="like-icon">👎</span><span class="likes-count">${absCount}</span>`;
+        }
+        
+        likesDiv.innerHTML = thumbsHTML;
+        
+        wrap.insertAdjacentElement('beforeend', likesDiv);
+        scrollToElement(likesDiv);
+        
+        // Animate icon
+        setTimeout(() => {
+          likesDiv.querySelector('.like-icon').classList.add('animate');
+        }, 50);
+        
+      }, 400);
+
+      // Move to next exchange after likes animation
+      setTimeout(() => {
+        exchangeIndex++;
+        const sc = scenarios[scenarioIndex];
+        // Each scenario now has only 1 exchange
+        if(exchangeIndex >= sc.exchanges.length){ 
+          renderScenarioOutro(); 
+        } else { 
+          renderExchange();
+        }
+      }, 1200);
+    }
+
+    function renderScenarioOutro(){
+      // Automatically continue to next scenario without delay
+      scenarioIndex++; 
+      exchangeIndex = 0;
+      if(scenarioIndex < scenarios.length){ 
+        renderScenarioIntro(); 
+      } else { 
+        renderEndScreen(); 
+      }
+      updateProgress();
+    }
+
+    function showInstantPostGamePopup() {
+      // Calculate metrics immediately
+      const { rows, counts, totalTagged, negativeRows, totalLikes, maxPossibleLikes } = computePlayerMetrics();
+      const analysis = generateBehavioralAnalysis(counts, rows, negativeRows);
+      
+      // Store for later use
+      window.resultsData = { rows, counts, totalTagged, negativeRows, totalLikes, maxPossibleLikes, analysis };
+      
+      const rank = getCategoryName(analysis.kindnessScore);
+      const rankEmoji = analysis.kindnessScore >= 80 ? "🌟" : 
+                        analysis.kindnessScore >= 60 ? "👍" :
+                        analysis.kindnessScore >= 40 ? "😐" : 
+                        analysis.kindnessScore >= 20 ? "⚠️" : "💀";
+      
+      // Convert negative likes to 0 minimum, but show dislikes instead
+      const displayLikes = Math.max(0, totalLikes);
+      const hasNegativeLikes = totalLikes < 0;
+      const dislikes = hasNegativeLikes ? Math.abs(totalLikes) : 0;
+      
+      // Determine color scheme based on likes
+      const likesColor = totalLikes > 0 ? 'linear-gradient(135deg, #FFD700, #FFA500)' :
+                        totalLikes < 0 ? 'linear-gradient(135deg, #ef4444, #dc2626)' :
+                        'linear-gradient(135deg, #666, #999)';
+      
+      const reactionText = analysis.kindnessScore >= 60 ? 'positively' : 
+                          analysis.kindnessScore >= 40 ? 'mixed' : 
+                          'negatively';
+      
+      // Create full-screen modal
+      const popup = document.createElement('div');
+      popup.id = 'instantPopup';
+      popup.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.85);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 10000;
+        animation: fadeIn 0.3s ease;
+      `;
+      
+      popup.innerHTML = `
+        <div style="
+          background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+          border-radius: 24px;
+          padding: 48px 32px;
+          max-width: 500px;
+          width: 90%;
+          box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+          text-align: center;
+          animation: slideIn 0.4s ease;
+        ">
+          <div style="font-size: 56px; margin-bottom: 16px;">${rankEmoji}</div>
+          
+          <div style="
+            font-size: 18px;
+            font-weight: 700;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 12px;
+          ">YOU EARNED</div>
+          
+          ${hasNegativeLikes ? `
+            <div style="
+              font-size: 72px;
+              font-weight: 900;
+              background: ${likesColor};
+              -webkit-background-clip: text;
+              -webkit-text-fill-color: transparent;
+              background-clip: text;
+              margin-bottom: 8px;
+              line-height: 1;
+            ">${dislikes} 👎</div>
+            
+            <div style="
+              font-size: 24px;
+              font-weight: 700;
+              color: #333;
+              margin-bottom: 24px;
+            ">LIKES</div>
+          ` : `
+            <div style="
+              font-size: 72px;
+              font-weight: 900;
+              background: ${likesColor};
+              -webkit-background-clip: text;
+              -webkit-text-fill-color: transparent;
+              background-clip: text;
+              margin-bottom: 8px;
+              line-height: 1;
+            ">${displayLikes}</div>
+            
+            <div style="
+              font-size: 24px;
+              font-weight: 700;
+              color: #333;
+              margin-bottom: 24px;
+            ">LIKES${displayLikes === 0 ? ' 😐' : ''}</div>
+          `}
+          
+          <div style="
+            font-size: 15px;
+            color: #666;
+            line-height: 1.6;
+            margin-bottom: 32px;
+            padding: 0 20px;
+          ">"Other players reacted ${reactionText}<br>to your vibe and responses."</div>
+          
+          <div style="
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            margin-bottom: 32px;
+          ">
+            <div style="
+              font-size: 48px;
+            ">🏆</div>
+            <div>
+              <div style="
+                font-size: 14px;
+                color: #999;
+                font-weight: 600;
+                text-transform: uppercase;
+                letter-spacing: 1px;
+              ">RANK</div>
+              <div style="
+                font-size: 28px;
+                font-weight: 800;
+                color: #333;
+              ">${rank}</div>
+            </div>
+          </div>
+          
+          <div style="
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #ddd, transparent);
+            margin: 32px 0;
+          "></div>
+          
+          <div style="display: flex; flex-direction: column; gap: 12px;">
+            <button onclick="closeInstantPopup(); renderResultsPage();" style="
+              background: linear-gradient(135deg, #FFD700, #FFC700);
+              color: #333;
+              border: none;
+              padding: 16px 32px;
+              border-radius: 12px;
+              font-size: 16px;
+              font-weight: 700;
+              cursor: pointer;
+              transition: all 0.2s ease;
+              text-transform: uppercase;
+              letter-spacing: 1px;
+              box-shadow: 0 4px 12px rgba(255, 215, 0, 0.4);
+            " onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
+              VIEW FULL RESULTS
+            </button>
+            
+            <button onclick="closeInstantPopup(); restart();" style="
+              background: transparent;
+              color: #666;
+              border: 2px solid #ddd;
+              padding: 16px 32px;
+              border-radius: 12px;
+              font-size: 16px;
+              font-weight: 600;
+              cursor: pointer;
+              transition: all 0.2s ease;
+              text-transform: uppercase;
+              letter-spacing: 1px;
+            " onmouseover="this.style.background='#f5f5f5'" onmouseout="this.style.background='transparent'">
+              PLAY AGAIN
+            </button>
+          </div>
+        </div>
+      `;
+      
+      document.body.appendChild(popup);
+    }
+    
+    function toggleAttributeDetails(category) {
+      const details = document.getElementById(category + 'Details');
+      const toggle = document.getElementById(category + 'Toggle');
+      
+      if (details && toggle) {
+        if (details.style.display === 'none' || details.style.display === '') {
+          details.style.display = 'block';
+          toggle.textContent = '▼';
+        } else {
+          details.style.display = 'none';
+          toggle.textContent = '▶';
+        }
+      }
+    }
+
+    function closeInstantPopup() {
+      const popup = document.getElementById('instantPopup');
+      if (popup) {
+        popup.remove();
+      }
+    }
+
+    function renderEndScreen(){
+      // Track game completion
+      if (window.gameStartTime) {
+        const duration = Date.now() - window.gameStartTime;
+        trackGameCompleted(duration);
+      }
+      
+      // Disconnect observer to prevent auto-scrolling on end screen
+      if (stageObserver) {
+        stageObserver.disconnect();
+        stageObserver = null;
+      }
+      
+      // Stop video and hide video player
+      if (captionInterval) {
+        clearInterval(captionInterval);
+        captionInterval = null;
+      }
+      isPlaying = false;
+      
+      const videoPlayer = document.getElementById('videoPlayer');
+      if (videoPlayer) {
+        videoPlayer.style.display = 'none';
+        videoPlayer.classList.remove('video-playing');
+      }
+      
+      // Show instant post-game popup immediately
+      showInstantPostGamePopup();
+    }
+
+    function restart(){ 
+      scenarioIndex = 0; 
+      exchangeIndex = 0; 
+      checkpointShown = false;
+      transcript.length = 0; 
+      currentCaptionIndex = 0;
+      conversationStarted = false;
+      
+      // Randomize scenarios for the next playthrough
+      randomizeScenarios();
+      
+      // Stop video if playing
+      if (captionInterval) {
+        clearInterval(captionInterval);
+        captionInterval = null;
+      }
+      isPlaying = false;
+      
+      // Show the video section again
+      const videoSection = document.querySelector('.post');
+      if (videoSection) {
+        videoSection.style.display = 'block';
+      }
+      
+      // Reset and show video player
+      const videoPlayer = document.getElementById('videoPlayer');
+      const personConcern = document.getElementById('personConcern');
+      const personCounter = document.getElementById('personCounter');
+      const captionEl = document.getElementById('videoCaption');
+      
+      if (videoPlayer) {
+        videoPlayer.style.display = 'flex';
+        videoPlayer.classList.remove('video-playing', 'video-transition');
+        const videoContent = document.getElementById('videoContent');
+        if (videoContent) videoContent.style.opacity = '1';
+      }
+      
+      if (captionEl) captionEl.classList.remove('active');
+      if (personConcern) personConcern.classList.remove('speaking');
+      if (personCounter) personCounter.classList.remove('speaking');
+      
+      // Clear and reinitialize stage
+      if (stage) {
+        stage.innerHTML = '';
+        
+        // Disconnect and reconnect observer
+        if (stageObserver) {
+          stageObserver.disconnect();
+        }
+        
+        stageObserver = new MutationObserver((mutations) => {
+          mutations.forEach((mutation) => {
+            if (mutation.addedNodes.length > 0) {
+              const lastAdded = mutation.addedNodes[mutation.addedNodes.length - 1];
+              if (lastAdded.nodeType === Node.ELEMENT_NODE) {
+                scrollToElement(lastAdded);
+              }
+            }
+          });
+        });
+        
+        stageObserver.observe(stage, {
+          childList: true,
+          subtree: false,
+          attributes: false
+        });
+      }
+      
+      // Scroll back to top
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      
+      // Reset analytics tracking
+      gameStartTime = Date.now();
+      clickedCheckCommunity = false;
+      clickedPlayAgain = false;
+      
+      updateProgress(); 
+    }
+
+    const ATTRIBUTE_SET = [
+      "Polite","Funny","Empathetic","Encouraging",
+      "Ignorant","Ego-centric","Neurotic","Sarcasm","Agitated","Aggressive","Rude","Disrespectful","Judgmental"
+    ];
+
+    const PROSOCIAL_SET = new Set(["Polite","Funny","Empathetic","Encouraging"]);
+    const NEGATIVE_SET = new Set(["Ignorant","Ego-centric","Neurotic","Sarcasm","Agitated","Aggressive","Rude","Disrespectful","Judgmental"]);
+
+    function mapToNewAttributes(oldAttrs=[]) {
+      const map = {
+        "Empathy":"Empathetic","Validation":"Polite","Reassurance":"Encouraging","Inclusion":"Polite","Coaching":"Encouraging","De-escalation":"Polite","Bridge-building":"Polite","Encouragement":"Encouraging","Fairness":"Polite","Respect":"Polite","Problem-solving":"Polite","Reframing":"Empathetic","Norm-setting":"Polite","Affirmation":"Encouraging","Support":"Encouraging","Nuance":"Polite","Informational":"Polite","Respectful":"Polite","Rational":"Polite","Reassuring":"Encouraging","Factual":"Polite","Balanced":"Polite","Helpful":"Polite","Mediating":"Polite",
+        "Sarcasm":"Sarcasm","Belittling":"Rude","Insult":"Rude","Gaslighting":"Disrespectful","Mocking":"Disrespectful","Dogpiling":"Aggressive","Blame":"Judgmental","Contempt":"Disrespectful","Dismissive":"Rude","Minimization":"Disrespectful","Personal Attack":"Aggressive","Provocation":"Aggressive","Shaming":"Judgmental","Accusation":"Judgmental","Cynicism":"Disrespectful","Group Attack":"Aggressive","Bitterness":"Agitated","Resignation":"Neurotic","Defensiveness":"Neurotic","Stigmatized Identity":"Ignorant","Alarmist":"Judgmental","Ad Hominem":"Aggressive","Accusatory":"Aggressive","Condescending":"Rude","Supportive":"Encouraging","Curious":"Polite","Affirming":"Encouraging","Peacemaking":"Polite","Empathetic":"Empathetic","Encouraging":"Encouraging",
+        "Inquiry":"Polite","Openness":"Polite","Reflection":"Polite","Growth":"Polite","Gratitude":"Polite","Closure":"Polite","Boundary":"Polite","Civility Request":"Polite","Disclosure":"Polite"
+      };
+      
+      // Use Set to prevent duplicates
+      const uniqueAttrs = new Set();
+      
+      // First pass: map old attributes to new ones
+      oldAttrs.forEach(a => { 
+        if(map[a]) {
+          uniqueAttrs.add(map[a]);
+        }
+      });
+      
+      // Second pass: add attributes that are already in the attribute set
+      oldAttrs.forEach(a => { 
+        if(ATTRIBUTE_SET.includes(a)) {
+          uniqueAttrs.add(a);
+        }
+      });
+      
+      return Array.from(uniqueAttrs);
+    }
+
+    function deriveSeverity(attrs=[]) {
+      const s = new Set(attrs);
+      if (s.has("Aggressive")) return "High";
+      if (s.has("Rude") || s.has("Disrespectful") || s.has("Sarcasm") || s.has("Judgmental")) return "Medium";
+      if (s.has("Agitated") || s.has("Ignorant") || s.has("Ego-centric") || s.has("Neurotic")) return "Low";
+      return "";
+    }
+
+    function computePlayerMetrics(){
+      // IMPORTANT: Only analyze the PLAYER's comments, not Sarah's or Rex's posts
+      const rows = transcript.filter(r=>r.user==='Player').map(r=>{
+        const mapped = mapToNewAttributes(r.attributes);
+        return { ...r, mappedAttrs: mapped };
+      });
+
+      // Note: likes are now based on scoring (+3, -1, -2) not 0-10 scale
+      // These are just for tracking, main score is the percentage
+      const totalLikes = rows.reduce((sum, r) => sum + (r.likes || 0), 0);
+      const maxPossibleLikes = rows.length * 3; // Maximum is 3 per question
+
+      // Count attributes only from player's responses
+      const counts = Object.fromEntries(ATTRIBUTE_SET.map(a=>[a,0]));
+      rows.forEach(r=>{ r.mappedAttrs.forEach(a=>{ if(counts[a]!==undefined) counts[a]++; }); });
+      const totalTagged = Object.values(counts).reduce((a,b)=>a+b,0) || 1;
+
+      // Filter for negative behaviors with severity
+      const negativeRows = rows.filter(r=> r.mappedAttrs.some(a=>NEGATIVE_SET.has(a)) )
+        .map(r=>({
+          ...r,
+          severity: r.severity || deriveSeverity(r.mappedAttrs)
+        }));
+
+      return { rows, counts, totalTagged, negativeRows, totalLikes, maxPossibleLikes };
+    }
+
+    // ---------------------------------
+    // Behavioral Analysis Functions
+    // ---------------------------------
+    
+    function generateBehavioralAnalysis(counts, rows, negativeRows) {
+      // NEW SCORING SYSTEM
+      // Count each type of response
+      const N = rows.length; // Total number of questions answered
+      let positiveCount = 0;
+      let mildNegativeCount = 0;
+      let severeNegativeCount = 0;
+      
+      // Classify each response
+      rows.forEach(row => {
+        const hasPositive = row.mappedAttrs.some(a => PROSOCIAL_SET.has(a));
+        const hasSevereNegative = row.mappedAttrs.some(a => 
+          ["Aggressive", "Rude", "Disrespectful", "Judgmental"].includes(a)
+        );
+        const hasMildNegative = row.mappedAttrs.some(a => 
+          ["Ignorant", "Ego-centric", "Neurotic", "Sarcasm", "Agitated", "Dismissive"].includes(a)
+        );
+        
+        if (hasSevereNegative) {
+          severeNegativeCount++;
+        } else if (hasMildNegative) {
+          mildNegativeCount++;
+        } else if (hasPositive) {
+          positiveCount++;
+        }
+      });
+      
+      // Calculate total score: TotalScore = (3 × PositiveCount) + (–1 × MildNegativeCount) + (–2 × SevereNegativeCount)
+      const totalScore = (3 * positiveCount) + (-1 * mildNegativeCount) + (-2 * severeNegativeCount);
+      
+      // Convert to percentage: Percentage = ((TotalScore + 2N) / (5N)) × 100
+      const percentage = N > 0 ? ((totalScore + (2 * N)) / (5 * N)) * 100 : 0;
+      const kindnessScore = Math.round(Math.max(0, Math.min(100, percentage)));
+      
+      // Identify predominant negative patterns
+      const negativeAttrs = Object.keys(counts).filter(k => NEGATIVE_SET.has(k) && counts[k] > 0);
+      negativeAttrs.sort((a, b) => {
+        const severityA = Math.abs(getSeverityWeight(a));
+        const severityB = Math.abs(getSeverityWeight(b));
+        if (severityA !== severityB) return severityB - severityA;
+        return counts[b] - counts[a];
+      });
+      const topNegative = negativeAttrs.slice(0, 3);
+      
+      // Identify strengths
+      const prosocialAttrs = Object.keys(counts).filter(k => PROSOCIAL_SET.has(k) && counts[k] > 0);
+      prosocialAttrs.sort((a, b) => counts[b] - counts[a]);
+      const topStrengths = prosocialAttrs.slice(0, 3);
+      
+      return {
+        kindnessScore,
+        positiveCount,
+        mildNegativeCount,
+        severeNegativeCount,
+        totalComments: N,
+        totalScore,
+        prosocialComments: positiveCount,
+        negativeComments: mildNegativeCount + severeNegativeCount,
+        topNegative,
+        topStrengths,
+        needsWork: topNegative.length > 0
+      };
+    }
+    
+    function getSeverityWeight(attribute) {
+      // Positive Traits: +3 points each
+      if (["Polite", "Funny", "Empathetic", "Encouraging"].includes(attribute)) return 3;
+      // Severe Negative Traits: -2 points each
+      if (["Aggressive", "Rude", "Disrespectful", "Judgmental"].includes(attribute)) return -2;
+      // Mild Negative Traits: -1 point each
+      if (["Ignorant", "Ego-centric", "Neurotic", "Sarcasm", "Agitated", "Dismissive"].includes(attribute)) return -1;
+      return 0;
+    }
+    
+    function getStrategyForAttribute(attribute) {
+      const strategies = {
+        "Aggressive": {
+          title: "Chill Out",
+          icon: "",
+          description: "Take a breath before you hit send!",
+          technique: "<strong>Pause.</strong> Breathe. Then respond.",
+          example: ""
+        },
+        "Rude": {
+          title: "Be Nice",
+          icon: "",
+          description: "A little kindness goes a long way.",
+          technique: "<strong>Golden Rule:</strong> Say what you'd want to hear.",
+          example: ""
+        },
+        "Disrespectful": {
+          title: "Show Respect",
+          icon: "",
+          description: "Respect others = they'll respect you.",
+          technique: "<strong>Listen first,</strong> then respond.",
+          example: ""
+        },
+        "Sarcasm": {
+          title: "Keep It Real",
+          icon: "",
+          description: "Say what you mean, mean what you say.",
+          technique: "<strong>Be direct:</strong> Drop the sarcasm.",
+          example: ""
+        },
+        "Judgmental": {
+          title: "Stay Curious",
+          icon: "",
+          description: "Ask questions instead of judging.",
+          technique: "<strong>Try:</strong> 'Tell me more about that.'",
+          example: ""
+        },
+        "Agitated": {
+          title: "Calm Down",
+          icon: "",
+          description: "Don't reply when you're angry.",
+          technique: "<strong>Step away,</strong> come back later.",
+          example: ""
+        },
+        "Neurotic": {
+          title: "Relax",
+          icon: "",
+          description: "You've got this! Take it easy.",
+          technique: "<strong>Breathe</strong> and ground yourself.",
+          example: ""
+        },
+        "Ego-centric": {
+          title: "See Their Side",
+          icon: "",
+          description: "It's not always about you!",
+          technique: "<strong>Try:</strong> Put yourself in their shoes.",
+          example: ""
+        },
+        "Ignorant": {
+          title: "Admit You Don't Know",
+          icon: "",
+          description: "It's cool to ask for help!",
+          technique: "<strong>Say:</strong> 'Can you help me understand?'",
+          example: ""
+        },
+        "Dismissive": {
+          title: "Listen & Validate",
+          icon: "",
+          description: "People's feelings matter!",
+          technique: "<strong>Try:</strong> 'I hear you. That's valid.'",
+          example: ""
+        }
+      };
+      
+      return strategies[attribute] || null;
+    }
+    
+    // Store collected orbs globally
+    window.collectedOrbs = [];
+    window.currentOrbSet = 0;
+    
+    function generateStrategiesHTML(analysis) {
+      if (!analysis.needsWork) {
+        return `
+          <div class="insight-box" style="text-align: center;">
+            <div class="emoji-big">🌟</div>
+            <div class="insight-title" style="justify-content: center;">Excellent Communication</div>
+            <div class="insight-text">
+              You consistently chose constructive, respectful responses that built understanding. Your communication style demonstrates emotional intelligence and creates positive interactions. Keep modeling this behavior in your community.
+            </div>
+          </div>`;
+      }
+      
+      // Get all available strategies
+      const allStrategies = [];
+      analysis.topNegative.forEach((attr) => {
+        const strategy = getStrategyForAttribute(attr);
+        if (strategy) {
+          allStrategies.push({ ...strategy, attribute: attr });
+        }
+      });
+      
+      // If we have fewer than 4 strategies, add more positive ones
+      const positiveStrategies = [
+        { title: "Be Encouraging", description: "Hype people up!", technique: "<strong>Try:</strong> 'You got this!' or 'Nice work!'", attribute: "Positive" },
+        { title: "Stay Empathetic", description: "Feel what they feel.", technique: "<strong>Say:</strong> 'I understand how that feels.'", attribute: "Positive" },
+        { title: "Keep It Funny", description: "Laughter connects people!", technique: "<strong>Share:</strong> Wholesome jokes, not mean ones.", attribute: "Positive" }
+      ];
+      
+      while (allStrategies.length < 4) {
+        const randomPositive = positiveStrategies[Math.floor(Math.random() * positiveStrategies.length)];
+        if (!allStrategies.find(s => s.title === randomPositive.title)) {
+          allStrategies.push(randomPositive);
+        }
+      }
+      
+      // Shuffle strategies
+      allStrategies.sort(() => Math.random() - 0.5);
+      
+      // Limit to exactly 4 orbs
+      const selectedStrategies = allStrategies.slice(0, 4);
+      
+      // Store strategies globally
+      window.levelUpStrategies = selectedStrategies;
+      window.collectedOrbs = [];
+      window.currentOrbSet = 0;
+      
+      return `
+        <div id="orbCollectionArea">
+          <div style="text-align: center; margin-bottom: 20px;">
+            <div style="font-size: 16px; font-weight: 700; color: var(--text); margin-bottom: 8px;">Boost Your rizz</div>
+            <div id="orbCounter" style="font-size: 13px; color: var(--muted); margin-bottom: 16px;">Collect orbs to level up! 0/4 collected</div>
+            <div id="auraBar" style="height: 8px; background: rgba(0,0,0,0.1); border-radius: 20px; overflow: hidden; max-width: 300px; margin: 0 auto;">
+              <div id="auraProgress" style="height: 100%; width: 0%; background: linear-gradient(90deg, #FFD700, #FFC700, #FFD700); transition: width 0.5s ease;"></div>
+            </div>
+          </div>
+          <div id="orbCards"></div>
+          <div id="collectedOrbsDisplay" style="margin-top: 20px;"></div>
+        </div>
+      `;
+    }
+    
+    function showOrbSet() {
+      const strategies = window.levelUpStrategies;
+      
+      if (window.collectedOrbs.length === 4) {
+        // All orbs collected!
+        document.getElementById('orbCards').innerHTML = `
+          <div style="text-align: center; padding: 32px; background: linear-gradient(135deg, rgba(255,215,0,0.2), rgba(255,215,0,0.1)); border-radius: 16px; border: 2px solid var(--accent);">
+            <div style="font-size: 64px; margin-bottom: 16px;">🎉</div>
+            <div style="font-size: 20px; font-weight: 700; color: var(--text); margin-bottom: 12px;">Your rizz is maxed.</div>
+            <div style="font-size: 14px; color: var(--muted);">You've collected all power-ups. Your communication skills are glowing!</div>
+          </div>
+        `;
+        return;
+      }
+      
+      const orbColors = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#FFA07A'];
+      
+      let html = '<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 16px; margin-bottom: 20px;">';
+      
+      strategies.forEach((strategy, index) => {
+        const color = orbColors[index];
+        const isCollected = window.collectedOrbs.some(orb => orb.title === strategy.title);
+        
+        html += `
+          <div class="orb-card" onclick="${isCollected ? '' : 'selectOrb(' + index + ')'}" style="
+            background: transparent;
+            border: 3px solid ${color};
+            border-radius: 20px;
+            padding: 20px 16px;
+            text-align: center;
+            cursor: ${isCollected ? 'default' : 'pointer'};
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            opacity: ${isCollected ? '0.5' : '1'};
+            ${isCollected ? 'pointer-events: none;' : ''}
+          " ${isCollected ? '' : "onmouseover=\"this.style.transform='scale(1.05) translateY(-5px)'; this.style.boxShadow='0 8px 20px " + color + "44';\" onmouseout=\"this.style.transform='scale(1) translateY(0)'; this.style.boxShadow='none';\""}>
+            <div style="
+              width: 60px;
+              height: 60px;
+              margin: 0 auto 12px;
+              background: ${color};
+              border-radius: 50%;
+              box-shadow: 0 4px 12px ${color}66, inset 0 -2px 8px rgba(0,0,0,0.1);
+              position: relative;
+            ">
+              <div style="
+                position: absolute;
+                top: 15%;
+                left: 20%;
+                width: 30%;
+                height: 30%;
+                background: rgba(255,255,255,0.4);
+                border-radius: 50%;
+                filter: blur(3px);
+              "></div>
+              ${isCollected ? '<div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 30px;">✓</div>' : ''}
+            </div>
+            <div style="font-size: 15px; font-weight: 700; color: var(--text); margin-bottom: 8px; line-height: 1.3;">${strategy.title}</div>
+            <div style="font-size: 12px; color: var(--muted); line-height: 1.4;">${strategy.description}</div>
+          </div>
+        `;
+      });
+      
+      html += '</div>';
+      document.getElementById('orbCards').innerHTML = html;
+    }
+    
+    function selectOrb(index) {
+      const strategy = window.levelUpStrategies[index];
+      window.collectedOrbs.push(strategy);
+      
+      // Update aura progress (always out of 4)
+      const progress = (window.collectedOrbs.length / 4) * 100;
+      document.getElementById('auraProgress').style.width = progress + '%';
+      
+      // Update counter
+      const counter = document.getElementById('orbCounter');
+      if (counter) {
+        counter.textContent = `Collect orbs to level up! ${window.collectedOrbs.length}/4 collected`;
+      }
+      
+      // Show collected orb details
+      showCollectedOrb(strategy);
+      
+      // Refresh the orb display to show collected state
+      setTimeout(() => {
+        showOrbSet();
+      }, 1500);
+    }
+    
+    function showCollectedOrb(strategy) {
+      const display = document.getElementById('collectedOrbsDisplay');
+      display.innerHTML = '';
+    }
+    
+    
+    function generateInsightsHTML(analysis, totalLikes, maxPossibleLikes) {
+      let insights = '';
+      
+      // Show the percentage score and category first
+      const categoryName = getCategoryName(analysis.kindnessScore);
+      const message = getKindnessMessage(analysis.kindnessScore);
+      
+      insights += `
+        <div class="tcard" style="background: linear-gradient(135deg, rgba(255,215,0,0.1), rgba(255,215,0,0.05)); border: 2px solid var(--accent);">
+          <div style="text-align: center;">
+            <div class="score-number" style="font-size: 64px; font-weight: 900; color: var(--accent);">${analysis.kindnessScore}%</div>
+            <div style="font-size: 20px; font-weight: 700; color: var(--text); margin-bottom: 12px;">${categoryName}</div>
+            <div style="font-size: 15px; line-height: 1.6; color: var(--text); max-width: 500px; margin: 0 auto;">
+              ${message}
+            </div>
+          </div>
+        </div>`;
+      
+      // Helper function to convert attribute names to proper adjectives
+      function toAdjective(attr) {
+        const conversions = {
+          'Sarcasm': 'sarcastic',
+          'Dismissive': 'dismissive',
+          'Polite': 'polite',
+          'Funny': 'funny',
+          'Empathetic': 'empathetic',
+          'Encouraging': 'encouraging',
+          'Ignorant': 'ignorant',
+          'Ego-centric': 'self-centered',
+          'Neurotic': 'anxious',
+          'Agitated': 'agitated',
+          'Aggressive': 'aggressive',
+          'Rude': 'rude',
+          'Disrespectful': 'disrespectful',
+          'Judgmental': 'judgmental'
+        };
+        return conversions[attr] || attr.toLowerCase();
+      }
+      
+      // Combine strengths and growth areas into one section
+      if (analysis.topStrengths.length > 0 || analysis.topNegative.length > 0) {
+        let strengthsText = '';
+        let negativeText = '';
+        
+        if (analysis.topStrengths.length > 0) {
+          const strengthsList = analysis.topStrengths.map(s => toAdjective(s)).join(', ');
+          const verb = analysis.topStrengths.length === 1 ? 'creates' : 'create';
+          strengthsText = `Your comments were ${strengthsList}. These qualities ${verb} positive interactions and build trust. `;
+        }
+        
+        if (analysis.topNegative.length > 0) {
+          const negativesList = analysis.topNegative.map(s => toAdjective(s)).join(', ');
+          const verb = analysis.topNegative.length === 1 ? 'was' : 'were';
+          negativeText = `Some of your comments ${verb} ${negativesList}. `;
+        }
+        
+        insights += `
+          <div class="insight-box">
+            <div class="insight-title">
+              <span>Your Online Reputation</span>
+            </div>
+            <div class="insight-text" style="font-size: 14px; line-height: 1.7;">
+              ${strengthsText}${negativeText}
+            </div>
+          </div>`;
+      }
+      
+      return insights;
+    }
+    
+ function getKindnessMessage(score) {
+  if (score >= 80) return "Great vibes. You help keep chats friendly, fun, and calm. GG.";
+  if (score >= 60) return "Mostly positive. You keep things chill most of the time. Keep it up.";
+  if (score >= 40) return "Mixed vibes. Sometimes positive, sometimes frustrated. You're close — keep going.";
+  if (score >= 20) return "Frequently negative. Your words can push people away. Time to rethink your approach.";
+  return "That got pretty toxic. Take a breath and reset before you push people away. You can do better.";
+}
+
+    function getCategoryName(score) {
+      if (score >= 80) return "Positive Communicator";
+      if (score >= 60) return "Mostly Positive";
+      if (score >= 40) return "Mixed";
+      if (score >= 20) return "Frequently Negative";
+      return "Highly Toxic";
+    }
+
+    function finishGame() {
+      // End the game early and show results
+      renderResultsPage();
+    }
+
+    function renderResultsPage(){
+      // Log that results are being viewed
+      logActionToSheets('view_results', '', '', '', '', '');
+      
+      const { rows, counts, totalTagged, negativeRows, totalLikes, maxPossibleLikes } = computePlayerMetrics();
+      const analysis = generateBehavioralAnalysis(counts, rows, negativeRows);
+      
+      // Store these for the detailed page
+      window.resultsData = { rows, counts, totalTagged, negativeRows, totalLikes, maxPossibleLikes, analysis };
+      
+      // Disconnect observer to prevent auto-scrolling on results page
+      if (stageObserver) {
+        stageObserver.disconnect();
+        stageObserver = null;
+      }
+      
+      // Stop video and hide video player
+      if (captionInterval) {
+        clearInterval(captionInterval);
+        captionInterval = null;
+      }
+      isPlaying = false;
+      
+      const videoPlayer = document.getElementById('videoPlayer');
+      if (videoPlayer) {
+        videoPlayer.style.display = 'none';
+        videoPlayer.classList.remove('video-playing');
+      }
+
+      // Go directly to detailed results page (skip likes animation)
+      showDetailedResults();
+      
+      stage.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function animateScore(targetScore) {
+      const scoreEl = document.getElementById('animatedScore');
+      if (!scoreEl) return;
+      
+      let currentScore = 0;
+      const duration = 1500; // 1.5 seconds
+      const increment = targetScore / (duration / 16); // 60fps
+      
+      const timer = setInterval(() => {
+        currentScore += increment;
+        if (currentScore >= targetScore) {
+          currentScore = targetScore;
+          clearInterval(timer);
+        }
+        scoreEl.textContent = Math.floor(currentScore);
+      }, 16);
+    }
+
+    window.resultsPage = 1;
+    
+    function showDetailedResults(){
+      const { rows, counts, totalTagged, negativeRows, totalLikes, maxPossibleLikes, analysis } = window.resultsData;
+      window.resultsPage = 1;
+      showResultsPage(1, { rows, counts, totalTagged, negativeRows, totalLikes, maxPossibleLikes, analysis });
+    }
+    
+
+    // Array of reflection questions for negative responses
+    const REFLECTION_QUESTIONS = [
+      "How would you feel if someone said this to you?",
+      "What might the other person be going through right now?",
+      "Could your words make someone's day worse?",
+      "Would you say this to someone's face?",
+      "Is this how you want to be remembered online?",
+      "What if your words were the last thing they read today?",
+      "How would your best friend feel reading this?",
+      "Are you being the person you want to be?",
+      "What would happen if you chose kindness instead?",
+      "Could you express this in a way that doesn't hurt?",
+      "Would you want someone to talk to your friend like this?",
+      "What positive impact could you have instead?",
+      "Is winning an argument worth making someone feel bad?",
+      "How might this affect someone who's already struggling?",
+      "What if they're having the worst day of their life?",
+      "Would your future self be proud of this comment?",
+      "Could your words push someone away from getting help?",
+      "What would change if you paused before posting?",
+      "Are you reacting from anger, or responding with thought?",
+      "What story might you not know about this person?"
+    ];
+    
+    function getRandomReflectionQuestion() {
+      return REFLECTION_QUESTIONS[Math.floor(Math.random() * REFLECTION_QUESTIONS.length)];
+    }
+
+        function navigateImpactCard(direction, data) {
+      const currentIndex = window.currentImpactCard || 0;
+      const newIndex = currentIndex + direction;
+      
+      // Bounds checking
+      if (newIndex < 0) {
+        showResultsPage(2, data);
+        return;
+      }
+      
+      const rows = data.rows || [];
+      if (newIndex >= rows.length) {
+        showResultsPage(4, data);
+        return;
+      }
+      
+      window.currentImpactCard = newIndex;
+      showResultsPage(3, data);
+    }
+
+    function navigateLevelUpCard(direction, data) {
+      const currentIndex = window.currentLevelUpCard || 0;
+      const newIndex = currentIndex + direction;
+      
+      // Get strategies list
+      const strategies = [];
+      if (data.analysis && data.analysis.topNegative) {
+        data.analysis.topNegative.forEach(attr => {
+          const strategy = getStrategyForAttribute(attr);
+          if (strategy) {
+            strategies.push({ attr, strategy });
+          }
+        });
+      }
+      
+      // Bounds checking
+      if (newIndex < 0) {
+        showResultsPage(3, data);
+        return;
+      }
+      
+      if (newIndex >= strategies.length) {
+        showResultsPage(5, data);
+        return;
+      }
+      
+      window.currentLevelUpCard = newIndex;
+      showResultsPage(4, data);
+    }
+
+    // Touch/swipe support for impact cards
+    let touchStartX = 0;
+    let touchEndX = 0;
+    
+    function handleSwipe() {
+      const swipeThreshold = 50;
+      const diff = touchStartX - touchEndX;
+      
+      if (Math.abs(diff) > swipeThreshold && window.resultsPage === 2) {
+        if (diff > 0) {
+          // Swipe left - next card
+          navigateImpactCard(1, window.resultsData);
+        } else {
+          // Swipe right - previous card
+          navigateImpactCard(-1, window.resultsData);
+        }
+      }
+    }
+    
+    document.addEventListener('touchstart', function(e) {
+      touchStartX = e.changedTouches[0].screenX;
+    });
+    
+    document.addEventListener('touchend', function(e) {
+      touchEndX = e.changedTouches[0].screenX;
+      handleSwipe();
+    });
+
+
+
+    function showResultsPage(pageNum, data){
+      const { rows, counts, totalTagged, negativeRows, totalLikes, maxPossibleLikes, analysis } = data;
+      window.resultsPage = pageNum;
+      
+      // Analytics disabled
+      if(pageNum === 1) {
+        trackGameCompleted(Math.round((Date.now() - window.gameStartTime) / 1000));
+      }
+      
+      if(pageNum === 1){
+        // Page 1: Final Score Card with Breakdown
+        const score = analysis.kindnessScore;
+        const positivePercent = analysis.totalComments > 0 ? Math.round((analysis.positiveCount / analysis.totalComments) * 100) : 0;
+        const mildPercent = analysis.totalComments > 0 ? Math.round((analysis.mildNegativeCount / analysis.totalComments) * 100) : 0;
+        const severePercent = analysis.totalComments > 0 ? Math.round((analysis.severeNegativeCount / analysis.totalComments) * 100) : 0;
+        
+        // Get attributes for each category
+        const positiveAttrs = Object.keys(counts).filter(k => PROSOCIAL_SET.has(k) && counts[k] > 0);
+        const mildAttrs = Object.keys(counts).filter(k => 
+          ["Ignorant", "Ego-centric", "Neurotic", "Sarcasm", "Agitated", "Dismissive"].includes(k) && counts[k] > 0
+        );
+        const severeAttrs = Object.keys(counts).filter(k => 
+          ["Aggressive", "Rude", "Disrespectful", "Judgmental"].includes(k) && counts[k] > 0
+        );
+        
+        const getMessage = (score) => {
+          if (score >= 80) return "Great vibes. You help keep chats friendly, fun, and calm.";
+          if (score >= 60) return "You mostly kept the chat friendly and fun.";
+          if (score >= 40) return "Mixed vibes. Sometimes positive, sometimes frustrated.";
+          if (score >= 20) return "Your words can push people away. Time to rethink your approach.";
+          return "That got pretty toxic. Take a breath and reset.";
+        };
+        
+        const getImpactMessage = (score) => {
+          if (score >= 60) return "Your words made the chat better more often than worse. Keep leveling up your choices to earn more LIKES and unlock new badges.";
+          if (score >= 40) return "You had moments of positivity and negativity. Focus on building others up to improve your impact.";
+          return "Your words created more tension than comfort. Focus on kindness to turn this around.";
+        };
+        
+        stage.innerHTML = `
+          <div class="fade-in" style="display:grid; gap:24px; max-width: 600px; margin: 0 auto;">
+            <div class="tcard" style="text-align: center; padding: 32px 24px;">
+              <div style="
+                font-size: 14px;
+                color: #666;
+                text-transform: uppercase;
+                letter-spacing: 2px;
+                font-weight: 700;
+                margin-bottom: 16px;
+              ">YOUR FINAL SCORE</div>
+              
+              <div style="
+                font-size: 64px;
+                font-weight: 900;
+                color: var(--accent);
+                margin-bottom: 8px;
+              ">${score}%</div>
+              
+              <div style="
+                width: 120px;
+                height: 120px;
+                margin: 24px auto;
+                position: relative;
+              ">
+                <svg width="120" height="120" style="transform: rotate(-90deg);">
+                  <circle cx="60" cy="60" r="54" fill="none" stroke="#e5e7eb" stroke-width="8"/>
+                  <circle 
+                    cx="60" cy="60" r="54" 
+                    fill="none" 
+                    stroke="var(--accent)" 
+                    stroke-width="8"
+                    stroke-dasharray="${2 * Math.PI * 54}"
+                    stroke-dashoffset="${2 * Math.PI * 54 * (1 - score / 100)}"
+                    stroke-linecap="round"
+                    style="transition: stroke-dashoffset 1.5s ease-out;"
+                  />
+                </svg>
+              </div>
+              
+              <div style="
+                font-size: 15px;
+                line-height: 1.6;
+                color: var(--text);
+                margin-bottom: 8px;
+              ">You earned <strong>${score}% Positive Impact</strong>.</div>
+              
+              <div style="
+                font-size: 14px;
+                line-height: 1.6;
+                color: var(--muted);
+              ">${getMessage(score)}</div>
+            </div>
+            
+            <div class="tcard" style="text-align: center;">
+              <div style="
+                font-size: 14px;
+                color: #666;
+                text-transform: uppercase;
+                letter-spacing: 2px;
+                font-weight: 700;
+                margin-bottom: 16px;
+              ">WHAT THIS MEANS FOR YOU</div>
+              
+              <div style="
+                font-size: 15px;
+                line-height: 1.7;
+                color: var(--text);
+              ">${getImpactMessage(score)}</div>
+            </div>
+            
+            <div style="display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin-top: 8px;">
+              <button class="reset" onclick="showInstantPostGamePopup()">Back</button>
+              <button class="cta" onclick="showResultsPage(2, window.resultsData)">Next</button>
+            </div>
+            <div class="play-count-display">${getPlayCount()} people have played this game</div>
+          </div>`;
+      }
+      else if(pageNum === 2){
+        // Page 2: Attribute Breakdown
+        const score = analysis.kindnessScore;
+        const positivePercent = analysis.totalComments > 0 ? Math.round((analysis.positiveCount / analysis.totalComments) * 100) : 0;
+        const mildPercent = analysis.totalComments > 0 ? Math.round((analysis.mildNegativeCount / analysis.totalComments) * 100) : 0;
+        const severePercent = analysis.totalComments > 0 ? Math.round((analysis.severeNegativeCount / analysis.totalComments) * 100) : 0;
+        
+        // Get attributes for each category
+        const positiveAttrs = Object.keys(counts).filter(k => PROSOCIAL_SET.has(k) && counts[k] > 0);
+        const mildAttrs = Object.keys(counts).filter(k => 
+          ["Ignorant", "Ego-centric", "Neurotic", "Sarcasm", "Agitated", "Dismissive"].includes(k) && counts[k] > 0
+        );
+        const severeAttrs = Object.keys(counts).filter(k => 
+          ["Aggressive", "Rude", "Disrespectful", "Judgmental"].includes(k) && counts[k] > 0
+        );
+        
+        stage.innerHTML = `
+          <div class="fade-in" style="display:grid; gap:24px; max-width: 600px; margin: 0 auto;">
+            <div class="tcard">
+              <div style="
+                font-size: 14px;
+                color: #666;
+                text-transform: uppercase;
+                letter-spacing: 2px;
+                font-weight: 700;
+                margin-bottom: 20px;
+                text-align: center;
+              ">ATTRIBUTE BREAKDOWN</div>
+              
+              <!-- Positive -->
+              <div style="margin-bottom: 20px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                  <button onclick="toggleAttributeDetails('positive')" style="
+                    background: none;
+                    border: none;
+                    cursor: pointer;
+                    font-size: 15px;
+                    font-weight: 600;
+                    color: var(--good);
+                    padding: 0;
+                    display: flex;
+                    align-items: center;
+                    gap: 6px;
+                  ">
+                    <span id="positiveToggle">▶</span> Positive
+                  </button>
+                  <span style="font-size: 15px; font-weight: 600; color: var(--good);">${positivePercent}%</span>
+                </div>
+                <div style="
+                  background: #e5e7eb;
+                  height: 24px;
+                  border-radius: 12px;
+                  overflow: hidden;
+                  margin-bottom: 8px;
+                ">
+                  <div style="
+                    background: var(--good);
+                    height: 100%;
+                    width: ${positivePercent}%;
+                    transition: width 1s ease-out;
+                  "></div>
+                </div>
+                <div id="positiveDetails" style="display: none; margin-top: 12px; padding: 12px; background: rgba(34, 197, 94, 0.1); border-radius: 8px; font-size: 14px; line-height: 1.6;">
+                  ${positiveAttrs.length > 0 ? 
+                    `<strong>Your positive attributes:</strong><br>${positiveAttrs.join(', ')}<br><br>` : 
+                    ''
+                  }
+                  <span style="color: var(--muted);">• You helped others feel safe and included</span>
+                </div>
+              </div>
+              
+              <!-- Mild -->
+              <div style="margin-bottom: 20px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                  <button onclick="toggleAttributeDetails('mild')" style="
+                    background: none;
+                    border: none;
+                    cursor: pointer;
+                    font-size: 15px;
+                    font-weight: 600;
+                    color: #ff9800;
+                    padding: 0;
+                    display: flex;
+                    align-items: center;
+                    gap: 6px;
+                  ">
+                    <span id="mildToggle">▶</span> Mild
+                  </button>
+                  <span style="font-size: 15px; font-weight: 600; color: #ff9800;">${mildPercent}%</span>
+                </div>
+                <div style="
+                  background: #e5e7eb;
+                  height: 24px;
+                  border-radius: 12px;
+                  overflow: hidden;
+                  margin-bottom: 8px;
+                ">
+                  <div style="
+                    background: #ff9800;
+                    height: 100%;
+                    width: ${mildPercent}%;
+                    transition: width 1s ease-out;
+                  "></div>
+                </div>
+                <div id="mildDetails" style="display: none; margin-top: 12px; padding: 12px; background: rgba(255, 152, 0, 0.1); border-radius: 8px; font-size: 14px; line-height: 1.6;">
+                  ${mildAttrs.length > 0 ? 
+                    `<strong>Your mild negative attributes:</strong><br>${mildAttrs.join(', ')}<br><br>` : 
+                    ''
+                  }
+                  <span style="color: var(--muted);">• You made some players shut down or stop trying</span>
+                </div>
+              </div>
+              
+              <!-- Severe -->
+              <div style="margin-bottom: 20px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                  <button onclick="toggleAttributeDetails('severe')" style="
+                    background: none;
+                    border: none;
+                    cursor: pointer;
+                    font-size: 15px;
+                    font-weight: 600;
+                    color: var(--bad);
+                    padding: 0;
+                    display: flex;
+                    align-items: center;
+                    gap: 6px;
+                  ">
+                    <span id="severeToggle">▶</span> Severe
+                  </button>
+                  <span style="font-size: 15px; font-weight: 600; color: var(--bad);">${severePercent}%</span>
+                </div>
+                <div style="
+                  background: #e5e7eb;
+                  height: 24px;
+                  border-radius: 12px;
+                  overflow: hidden;
+                  margin-bottom: 8px;
+                ">
+                  <div style="
+                    background: var(--bad);
+                    height: 100%;
+                    width: ${severePercent}%;
+                    transition: width 1s ease-out;
+                  "></div>
+                </div>
+                <div id="severeDetails" style="display: none; margin-top: 12px; padding: 12px; background: rgba(239, 68, 68, 0.1); border-radius: 8px; font-size: 14px; line-height: 1.6;">
+                  ${severeAttrs.length > 0 ? 
+                    `<strong>Your severe negative attributes:</strong><br>${severeAttrs.join(', ')}<br><br>` : 
+                    ''
+                  }
+                  <span style="color: var(--muted);">• You increased tension and frustration</span>
+                </div>
+              </div>
+            </div>
+            
+            <div style="display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin-top: 8px;">
+              <button class="reset" onclick="showResultsPage(1, window.resultsData)">Back</button>
+              <button class="cta" onclick="showResultsPage(3, window.resultsData)">Next</button>
+            </div>
+          </div>`;
+      }
+      else if(pageNum === 3){
+        // Page 3: Your Impact - One card at a time
+        const cardIndex = window.currentImpactCard || 0;
+        const totalCards = rows.length;
+        const r = rows[cardIndex];
+        
+        // Extract person's name from feeling text if available
+        let impactText = 'No impact recorded';
+        let personName = 'others';
+        
+        if (r.feeling) {
+          // Try to extract name from scenarios (look for target or who field)
+          if (r.target) {
+            personName = r.target;
+          }
+          
+          // Format the feeling text to be more personal
+          let feelingLower = r.feeling.toLowerCase();
+          if (feelingLower.startsWith('felt ')) {
+            feelingLower = feelingLower.substring(5); // Remove "felt " prefix
+          }
+          
+          // Capitalize person name properly
+          personName = personName.charAt(0).toUpperCase() + personName.slice(1).toLowerCase();
+          
+          impactText = `You made ${personName} feel ${feelingLower}`;
+        }
+        
+        stage.innerHTML = `
+          <div class="fade-in" style="display:grid; gap:16px;">
+            <div class="tcard">
+              <div class="name" style="font-size: 20px; margin-bottom: 16px;">Your Impact</div>
+              <div style="text-align: center; font-size: 16px; color: var(--muted); margin-bottom: 20px;">
+                Response ${cardIndex + 1} of ${totalCards}
+              </div>
+              <div id="logBody" style="display: grid; gap: 12px; margin-top: 12px;">
+                <div style="background: rgba(0,0,0,.02); border: 2px solid var(--accent); border-radius: 16px; padding: 24px; box-shadow: 0 4px 12px rgba(255,215,0,0.2);">
+                  <div style="font-size: 18px; font-weight: 700; color: var(--text); margin-bottom: 16px; line-height: 1.5;">${r.comment}</div>
+                  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px;">
+                    <div style="background: rgba(255,255,255,0.5); padding: 16px; border-radius: 12px;">
+                      <div style="font-size: 14px; color: var(--muted); text-transform: uppercase; font-weight: 700; margin-bottom: 8px;">Likes</div>
+                      <div style="font-size: 28px; font-weight: 700; color: ${r.likes === 10 ? 'var(--good)' : r.likes === 3 ? '#ff9800' : 'var(--bad)'};">${r.likes == 0 ? '👎 ' + (Math.floor(Math.random() * 9) + 1) : r.likes}</div>
+                    </div>
+                    <div style="background: rgba(255,255,255,0.5); padding: 16px; border-radius: 12px;">
+                      <div style="font-size: 14px; color: var(--muted); text-transform: uppercase; font-weight: 700; margin-bottom: 8px;">Style</div>
+                      <div style="font-size: 16px; color: var(--text); font-weight: 600;">${(r.mappedAttrs||[]).join(', ') || 'Neutral'}</div>
+                    </div>
+                  </div>
+                  <div style="background: rgba(255,255,255,0.5); padding: 16px; border-radius: 12px;">
+                    <div style="font-size: 14px; color: var(--muted); text-transform: uppercase; font-weight: 700; margin-bottom: 8px;">Impact</div>
+                    <div style="font-size: 16px; color: var(--text); font-weight: 600; line-height: 1.4;">
+                      ${impactText}
+                    </div>
+                    ${r.likes === 0 || r.likes === -1 || r.likes === -2 ? `
+                      <div style="margin-top: 12px; padding: 12px; background: rgba(255, 152, 0, 0.1); border-left: 3px solid #ff9800; border-radius: 6px;">
+                        <div style="font-size: 14px; color: #f57c00; font-weight: 600; margin-bottom: 6px;">💭 Reflect:</div>
+                        <div style="font-size: 14px; color: #666; line-height: 1.5;">${getRandomReflectionQuestion()}</div>
+                      </div>
+                    ` : ''}
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div style="display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin-top: 8px;">
+              <button class="reset" onclick="navigateImpactCard(-1, window.resultsData)" ${cardIndex === 0 ? 'disabled style="opacity:0.5;cursor:not-allowed;"' : ''}>Back</button>
+              ${cardIndex < totalCards - 1 ? 
+                '<button class="cta" onclick="navigateImpactCard(1, window.resultsData)">Next</button>' :
+                '<button class="cta" onclick="showResultsPage(4, window.resultsData)">Next</button>'
+              }
+            </div>
+          </div>`;
+      }
+      else if(pageNum === 4){
+        // Page 4: Level Up
+        stage.innerHTML = `
+          <div class="fade-in" style="display:grid; gap:16px;">
+            <div class="tcard">
+              <div class="name" style="font-size: 20px; margin-bottom: 8px;">
+                Level Up
+              </div>
+              <div class="k" style="margin-bottom: 16px; font-size: 14px;">Collect orbs to level up! 0/4 collected</div>
+              ${generateStrategiesHTML(analysis)}
+              
+
+            </div>
+            <div style="display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin-top: 8px;">
+              <button class="reset" onclick="showResultsPage(3, window.resultsData)">Back</button>
+              <button class="cta" onclick="showResultsPage(5, window.resultsData)">Next</button>
+            </div>
+          </div>`;
+        
+        // Initialize orb collection after rendering
+        setTimeout(() => {
+          if (typeof showOrbSet === 'function') {
+            showOrbSet();
+          }
+        }, 100);
+      }
+      else if(pageNum === 5){
+        // Page 5: Final Actions
+        stage.innerHTML = `
+          <div class="fade-in" style="display:grid; gap:16px;">
+            <div class="tcard">
+            </div>
+            <div style="display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin-top: 8px;">
+              <button class="cta" onclick="trackLinkClick('Play Again'); restart()">Play Again</button>
+            </div>
+          </div>`;
+      }
+      
+      stage.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    let stageObserver = null;
+
+    // Google Sheets submission function
+    const GOOGLE_SHEET_URL = 'https://script.google.com/macros/s/AKfycby41MvznrYIMZUjYqC-lnh4kho_KJPVBSV8YO8DpchISAy4VYU_FymiMLZOhoRT_kHb/exec';
+    
+    function submitResponseToSheet(responseData) {
+      // Create a unique session ID if not exists
+      if (!window.sessionId) {
+        window.sessionId = 'session_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+      }
+      
+      const dataToSubmit = {
+        sessionId: window.sessionId,
+        timestamp: new Date().toISOString(),
+        gameState: responseData.gameState || 'unknown',
+        scenarioIndex: responseData.scenarioIndex || 0,
+        exchangeIndex: responseData.exchangeIndex || 0,
+        totalResponses: (responseData.responses || []).length,
+        completed: responseData.completed || false,
+        responsesSummary: (responseData.responses || []).map((r, i) => `Response ${i+1}: ${r.comment || 'N/A'}`).join(' | ')
+      };
+      
+      // Use fetch to POST to Google Sheets
+      fetch(GOOGLE_SHEET_URL, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(dataToSubmit)
+      })
+      .catch(err => console.log('Response recorded')); // Expected behavior with no-cors
+    }
+
+    function safeStart(){
+      try {
+        if(!document.getElementById('stage')){
+          document.addEventListener('DOMContentLoaded', safeStart, { once: true });
+          return;
+        }
+        stage = document.getElementById('stage');
+        scenarioIndex = 0; 
+        exchangeIndex = 0; 
+        stage.innerHTML = '';
+        
+        // Disconnect old observer if exists
+        if (stageObserver) {
+          stageObserver.disconnect();
+        }
+        
+        // Add mutation observer to auto-scroll when content changes
+        stageObserver = new MutationObserver((mutations) => {
+          mutations.forEach((mutation) => {
+            if (mutation.addedNodes.length > 0) {
+              const lastAdded = mutation.addedNodes[mutation.addedNodes.length - 1];
+              if (lastAdded.nodeType === Node.ELEMENT_NODE) {
+                scrollToElement(lastAdded);
+              }
+            }
+          });
+        });
+        
+        stageObserver.observe(stage, {
+          childList: true,
+          subtree: false,
+          attributes: false
+        });
+        
+        // Don't start scenarios automatically - video will trigger it
+        updateProgress();
+      } catch(err){
+        console.error('Startup error:', err);
+        if(stage){
+          stage.innerHTML = `
+            <div class="tcard fade-in">
+              <div class="name">Could not start the game</div>
+              <div class="k">${(err && err.message) ? err.message : 'Unknown error'}</div>
+              <div style="margin-top:10px; display:flex; gap:8px; flex-wrap:wrap;">
+                <button class="reset" onclick="safeStart()">Try Again</button>
+                <button class="reset" onclick="restart()">Reset</button>
+              </div>
+            </div>`;
+        }
+      }
+    }
+
+    function showProfileTooltip(event, attr, definition) {
+      hideTooltip();
+      
+      // Prevent default touch behavior
+      if (event.type === 'touchstart') {
+        event.preventDefault();
+      }
+      
+      const tooltip = document.createElement('div');
+      tooltip.id = 'activeTooltip';
+      tooltip.className = 'tooltip';
+      tooltip.innerHTML = `
+        <div class="tooltip-label">${attr}</div>
+        <div class="tooltip-def">${definition}</div>`;
+      document.body.appendChild(tooltip);
+      
+      const rect = event.target.getBoundingClientRect();
+      let left = rect.left + rect.width / 2 - tooltip.offsetWidth / 2;
+      let top = rect.top - tooltip.offsetHeight - 10;
+      
+      // Clamp to viewport
+      if(left < 10) left = 10;
+      if(left + tooltip.offsetWidth > window.innerWidth - 10) left = window.innerWidth - tooltip.offsetWidth - 10;
+      if(top < 10) top = rect.bottom + 10;
+      
+      tooltip.style.left = left + 'px';
+      tooltip.style.top = top + 'px';
+      
+      // Auto-hide tooltip on mobile after 3 seconds
+      if (event.type === 'touchstart') {
+        setTimeout(hideTooltip, 3000);
+      }
+    }
+
+    function showTooltip(event, attr, definition) {
+      showProfileTooltip(event, attr, definition);
+    }
+
+    function hideTooltip() {
+      const existing = document.getElementById('activeTooltip');
+      if(existing) existing.remove();
+    }
+    
+    // Close tooltip when clicking/touching outside
+    document.addEventListener('click', function(e) {
+      if (!e.target.closest('.profile-cell') && !e.target.closest('.tooltip')) {
+        hideTooltip();
+      }
+    });
+    
+    document.addEventListener('touchstart', function(e) {
+      if (!e.target.closest('.profile-cell') && !e.target.closest('.tooltip')) {
+        hideTooltip();
+      }
+    });
+
+    if (document.readyState === 'complete' || document.readyState === 'interactive') {
+      safeStart();
+      initPlayCounter();
+    } else {
+      document.addEventListener('DOMContentLoaded', function() {
+        safeStart();
+        initPlayCounter();
+      }, { once: true });
+    }
+
+    // Capture partial responses if user leaves the game
+    window.addEventListener('beforeunload', function() {
+      if (window.sessionId && window.resultsData && window.resultsData.rows && window.resultsData.rows.length > 0) {
+        // Send partial responses asynchronously (won't block page unload)
+        const GOOGLE_SHEET_URL = 'https://script.google.com/macros/s/AKfycby41MvznrYIMZUjYqC-lnh4kho_KJPVBSV8YO8DpchISAy4VYU_FymiMLZOhoRT_kHb/exec';
+        
+        const dataToSubmit = {
+          sessionId: window.sessionId,
+          timestamp: new Date().toISOString(),
+          completed: false,
+          totalResponses: window.resultsData.rows.length,
+          positiveCount: window.resultsData.counts ? window.resultsData.counts.positive : 0,
+          mildCount: window.resultsData.counts ? window.resultsData.counts.mild : 0,
+          negativeCount: window.resultsData.counts ? window.resultsData.counts.negative : 0,
+          totalLikes: window.resultsData.totalLikes || 0,
+          responsesSummary: window.resultsData.rows.map((r, i) => `${i+1}. ${r.comment || 'N/A'}`).join(' || '),
+          exitedEarly: true,
+          userAgent: navigator.userAgent
+        };
+        
+        // Use sendBeacon for reliable delivery before page unload
+        navigator.sendBeacon(GOOGLE_SHEET_URL, JSON.stringify(dataToSubmit));
+      }
+    });
+
+  </script>
+</body>
+</html>
